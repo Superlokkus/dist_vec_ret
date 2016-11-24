@@ -9,7 +9,7 @@ foreach(testSrc ${TEST_SRCS})
         #Add compile target
         add_executable(${testName} ${testSrc})
 
-        set_property(TARGET ${testName} PROPERTY CXX_STANDARD 11)
+        set_property(TARGET ${testName} PROPERTY CXX_STANDARD 14)
 
         #link to Boost libraries AND your targets and dependencies
         target_link_libraries(${testName} ${Boost_LIBRARIES}) #portable_service_lib)
