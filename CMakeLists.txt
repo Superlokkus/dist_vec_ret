@@ -16,7 +16,7 @@ ${PROJECT_SOURCE_DIR}/dist_vec_ret.cpp
 add_library(dist_vec_ret_lib ${CORE_SOURCE_FILES})
 
 set_property(TARGET dist_vec_ret_lib PROPERTY LINKER_LANGUAGE CXX)
-set_property(TARGET dist_vec_ret_lib PROPERTY CXX_STANDARD 11)
+set_property(TARGET dist_vec_ret_lib PROPERTY CXX_STANDARD 14)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/mpi)
 
