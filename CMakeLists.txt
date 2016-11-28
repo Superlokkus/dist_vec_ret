@@ -8,17 +8,17 @@ include_directories(${Boost_INCLUDE_DIR})
 
 include_directories("${PROJECT_BINARY_DIR}")
 
-set (CORE_SOURCE_FILES
+set (dist_vec_ret_lib_headers
 ${PROJECT_SOURCE_DIR}/dist_vec_ret.hpp
-${PROJECT_SOURCE_DIR}/dist_vec_ret.cpp
 )
 
-add_library(dist_vec_ret_lib ${CORE_SOURCE_FILES})
+add_library(dist_vec_ret_lib ${PROJECT_SOURCE_DIR}/dist_vec_ret.cpp)
+target_include_directories(dist_vec_ret_lib INTERFACE ${PROJECT_SOURCE_DIR})
 
 set_property(TARGET dist_vec_ret_lib PROPERTY LINKER_LANGUAGE CXX)
 set_property(TARGET dist_vec_ret_lib PROPERTY CXX_STANDARD 14)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/mpi)
 
-enable_testing()
+
 add_subdirectory(test)
