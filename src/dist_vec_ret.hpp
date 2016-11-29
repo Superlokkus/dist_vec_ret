@@ -44,9 +44,10 @@ namespace information_retrieval {
     };
 
     using global_weight_t = weigth_index_t;
-    class weighter {
+
+    class weigther {
     public:
-        explicit weighter(global_weight_t &global_weight, std::shared_ptr<count_index_t> count_index) :
+        explicit weigther(global_weight_t &global_weight, std::shared_ptr<count_index_t> count_index) :
                 global_weight_(global_weight), count_index_(count_index) {
         }
 

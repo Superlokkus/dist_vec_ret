@@ -1,5 +1,0 @@
-#!/bin/bash
-
-mkdir build
-cd build
-cmake .. -D"MPI_C_LIBRARIES=$HOME/mpich-install/lib64/libmpi.so;$HOME/mpich-install/lib64/libpmpi.so" -D"MPI_C_INCLUDE_PATH=$HOME/mpich-install/include" -D"MPI_CXX_LIBRARIES=$HOME/mpich-install/lib64/libmpicxx.so;$HOME/mpich-install/lib64/libmpi.so;$HOME/mpich-install/lib64/libpmpi.so"

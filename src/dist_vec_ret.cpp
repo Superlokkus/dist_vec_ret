@@ -41,7 +41,7 @@ namespace information_retrieval {
         std::for_each(word.begin(), word.end(), [](char &c) { c = std::tolower(c); });
     }
 
-    count_index_t weighter::get_weight() const {
+    count_index_t weigther::get_weight() const {
         count_index_t final_weights;
         const auto local_global_correlation = [](const count_index_t::mapped_type &local,
                                                  const count_index_t::mapped_type &global) ->
@@ -57,7 +57,7 @@ namespace information_retrieval {
         return information_retrieval::count_index_t();
     }
 
-    void weighter::local_weighting() {
+    void weigther::local_weighting() {
         const uint_fast64_t word_count = std::accumulate(count_index_->cbegin(), count_index_->cend(), 0,
                                                          [](const uint_fast64_t &prev,
                                                             const count_index_t::value_type &next) {
@@ -72,7 +72,7 @@ namespace information_retrieval {
         this->local_weigths_ = local_weigths;
     }
 
-    void weighter::global_weighting() {
+    void weigther::global_weighting() {
 
     }
 
