@@ -39,9 +39,11 @@ BOOST_AUTO_TEST_CASE(local_weight_test) {
     weight_fixture wf;
     information_retrieval::global_weight_t global_weight;
     information_retrieval::weighter w{global_weight, wf.word_index};
-    information_retrieval::index_t local_weights;
+    information_retrieval::weigth_index_t local_weights;
     w.local_weighting(local_weights);
-    BOOST_CHECK_EQUAL(local_weights["test"], 2 / 11);
+    BOOST_CHECK_EQUAL(local_weights["test"], 2.0 / 11.0);
+    BOOST_CHECK_EQUAL(local_weights["woot"], 0);
+    BOOST_CHECK_EQUAL(local_weights["tasty"], 1.0 / 11.0);
 }
 
 

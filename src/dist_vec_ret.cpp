@@ -20,7 +20,7 @@ namespace information_retrieval {
         if (isindexed())
             return;
 
-        auto new_index = std::make_shared<index_t>();
+        auto new_index = std::make_shared<count_index_t>();
         for (std::string word; *input_stream_ >> word;) {
             stemming(word);
             (*new_index)[word] += 1;
@@ -30,7 +30,7 @@ namespace information_retrieval {
         this->isindexed_ = true;
     }
 
-    std::shared_ptr<index_t> word_counter::get_index() const {
+    std::shared_ptr<count_index_t> word_counter::get_index() const {
         if (!this->isindexed_)
             throw std::logic_error("Call update_index at least once before trying to get the index");
         return this->last_generated_index_;
@@ -41,32 +41,32 @@ namespace information_retrieval {
         std::for_each(word.begin(), word.end(), [](char &c) { c = std::tolower(c); });
     }
 
-    index_t weighter::get_weight() const {
-        index_t final_weights;
-        const auto local_global_correlation = [](const index_t::mapped_type &local,
-                                                 const index_t::mapped_type &global) ->
-                index_t::mapped_type {
+    count_index_t weighter::get_weight() const {
+        count_index_t final_weights;
+        const auto local_global_correlation = [](const count_index_t::mapped_type &local,
+                                                 const count_index_t::mapped_type &global) ->
+                count_index_t::mapped_type {
             return local * global;
         };
 
         std::transform(this->local_weigths_.cbegin(), this->local_weigths_.cend(), this->global_weights_.cbegin(),
                        std::inserter(final_weights, final_weights.end()), [&local_global_correlation]
-                               (const index_t::value_type &local, const index_t::value_type &global) {
+                               (const count_index_t::value_type &local, const count_index_t::value_type &global) {
                     return std::make_pair(local.first, local_global_correlation(local.second, global.second));
                 });
-        return information_retrieval::index_t();
+        return information_retrieval::count_index_t();
     }
 
     void weighter::local_weighting() {
         const uint_fast64_t word_count = std::accumulate(count_index_->cbegin(), count_index_->cend(), 0,
                                                          [](const uint_fast64_t &prev,
-                                                            const index_t::value_type &next) {
+                                                            const count_index_t::value_type &next) {
                                                              return prev + next.second;
                                                          });
-        index_t local_weigths;
+        weigth_index_t local_weigths;
         std::transform(count_index_->cbegin(), count_index_->cend(),
                        std::inserter(local_weigths, local_weigths.end()),
-                       [&word_count](const index_t::value_type &word) {
+                       [&word_count](const weigth_index_t::value_type &word) {
                            return std::make_pair(word.first, word.second / word_count);
                        });
         this->local_weigths_ = local_weigths;

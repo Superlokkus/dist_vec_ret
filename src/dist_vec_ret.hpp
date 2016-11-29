@@ -13,7 +13,9 @@
 
 namespace information_retrieval {
 
-    using index_t = std::map<std::string,uint_fast32_t>;
+    using string_t = std::string;
+    using count_index_t = std::map<string_t, uint_fast32_t>;
+    using weigth_index_t = std::map<string_t, double>;
 
     class word_counter {
     public:
@@ -30,7 +32,7 @@ namespace information_retrieval {
 
         void update_index();
 
-        std::shared_ptr<index_t> get_index() const;
+        std::shared_ptr<count_index_t> get_index() const;
 
         static void stemming(std::string &word);
 
@@ -38,33 +40,33 @@ namespace information_retrieval {
         bool isindexed_ = false;
 
         std::unique_ptr<std::istream> input_stream_;
-        std::shared_ptr<index_t> last_generated_index_;
+        std::shared_ptr<count_index_t> last_generated_index_;
     };
 
-    using global_weight_t = index_t;
+    using global_weight_t = weigth_index_t;
     class weighter {
     public:
-        explicit weighter(global_weight_t &global_weight, std::shared_ptr<index_t> count_index) :
+        explicit weighter(global_weight_t &global_weight, std::shared_ptr<count_index_t> count_index) :
                 global_weight_(global_weight), count_index_(count_index) {
         }
 
         void local_weighting();
 
-        void local_weighting(index_t &for_debug_purposes) {
+        void local_weighting(weigth_index_t &for_debug_purposes) {
             local_weighting();
             for_debug_purposes = local_weigths_;
         }
 
         void global_weighting();
 
-        index_t get_weight() const;
+        count_index_t get_weight() const;
 
     private:
         global_weight_t &global_weight_;
-        std::shared_ptr<index_t> count_index_;
+        std::shared_ptr<count_index_t> count_index_;
 
-        index_t local_weigths_;
-        index_t global_weights_;
+        weigth_index_t local_weigths_;
+        weigth_index_t global_weights_;
 
     };
 
