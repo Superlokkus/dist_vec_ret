@@ -8,8 +8,9 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <set>
 #include <cstdint>
-
+#include <boost/uuid/uuid.hpp>
 
 namespace information_retrieval {
 
@@ -43,7 +44,21 @@ namespace information_retrieval {
         std::shared_ptr<count_index_t> last_generated_index_;
     };
 
-    using global_weight_t = weight_index_t;
+    class global_weight_t {
+    public:
+        using count_t = uint_fast64_t;
+        using document_id_t = boost::uuids::uuid;
+
+        count_t get_total_document_count() const;
+
+        count_t get_document_count_with(string_t word) const;
+
+        count_t get_document_count_with(std::set<string_t> word) const;
+
+        void update_document(const document_id_t &document_id, count_index_t);
+
+        void remove_document(const document_id_t &document_id);
+    };
 
     class weighter {
     public:
@@ -55,7 +70,7 @@ namespace information_retrieval {
 
         void local_weighting(weight_index_t &for_debug_purposes) {
             local_weighting();
-            for_debug_purposes = local_weigths_;
+            for_debug_purposes = local_weights_;
         }
 
         void global_weighting();
@@ -66,7 +81,7 @@ namespace information_retrieval {
         global_weight_t &global_weight_;
         std::shared_ptr<count_index_t> count_index_;
 
-        weight_index_t local_weigths_;
+        weight_index_t local_weights_;
         weight_index_t global_weights_;
 
     };

@@ -50,7 +50,7 @@ namespace information_retrieval {
             return local * global;
         };
 
-        std::transform(this->local_weigths_.cbegin(), this->local_weigths_.cend(), this->global_weights_.cbegin(),
+        std::transform(this->local_weights_.cbegin(), this->local_weights_.cend(), this->global_weights_.cbegin(),
                        std::inserter(final_weights, final_weights.end()), [&local_global_correlation]
                                (const count_index_t::value_type &local, const count_index_t::value_type &global) {
                     return std::make_pair(local.first, local_global_correlation(local.second, global.second));
@@ -70,10 +70,31 @@ namespace information_retrieval {
                        [&word_count](const weight_index_t::value_type &word) {
                            return std::make_pair(word.first, word.second / word_count);
                        });
-        this->local_weigths_ = local_weigths;
+        this->local_weights_ = local_weigths;
     }
 
     void weighter::global_weighting() {
+
+    }
+
+
+    global_weight_t::count_t global_weight_t::get_total_document_count() const {
+        return 0;
+    }
+
+    global_weight_t::count_t global_weight_t::get_document_count_with(string_t word) const {
+        return 0;
+    }
+
+    global_weight_t::count_t global_weight_t::get_document_count_with(std::set<string_t> word) const {
+        return 0;
+    }
+
+    void global_weight_t::update_document(const global_weight_t::document_id_t &document_id, count_index_t) {
+
+    }
+
+    void global_weight_t::remove_document(const global_weight_t::document_id_t &document_id) {
 
     }
 

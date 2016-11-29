@@ -20,5 +20,5 @@ set_property(TARGET dist_vec_ret_lib PROPERTY CXX_STANDARD 14)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/mpi)
 
-
+enable_testing()
 add_subdirectory(test)

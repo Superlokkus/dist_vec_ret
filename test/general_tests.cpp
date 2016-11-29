@@ -24,15 +24,15 @@ BOOST_AUTO_TEST_CASE(simple_query_test){
 }
 
 struct weight_fixture {
-    weight_fixture() : index1(query) {
+    weight_fixture() {
+        information_retrieval::word_counter index1(query);
         index1.update_index();
         this->word_index = index1.get_index();
 
     }
 
     const std::string query = "This is a tasty test query for test purposes, it is.";
-    information_retrieval::word_counter index1;
-    decltype(index1.get_index()) word_index;
+    decltype(std::declval<information_retrieval::word_counter>().get_index()) word_index;
 };
 
 BOOST_AUTO_TEST_CASE(local_weight_test) {
