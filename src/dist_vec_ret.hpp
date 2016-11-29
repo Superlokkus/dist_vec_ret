@@ -29,8 +29,8 @@ namespace information_retrieval {
         }
 
         void update_index();
-        index_t get_index() const;
-        size_t get_word_count() const;
+
+        std::shared_ptr<index_t> get_index() const;
 
         static void stemming(std::string &word);
 
@@ -38,14 +38,33 @@ namespace information_retrieval {
         bool isindexed_ = false;
 
         std::unique_ptr<std::istream> input_stream_;
-        index_t last_generated_index_;
-        size_t word_count_;
+        std::shared_ptr<index_t> last_generated_index_;
     };
 
     using global_weight_t = index_t;
     class weighter {
-        explicit weighter(const global_weight_t& global_weight_t) {
+    public:
+        explicit weighter(global_weight_t &global_weight, std::shared_ptr<index_t> count_index) :
+                global_weight_(global_weight), count_index_(count_index) {
         }
+
+        void local_weighting();
+
+        void local_weighting(index_t &for_debug_purposes) {
+            local_weighting();
+            for_debug_purposes = local_weigths_;
+        }
+
+        void global_weighting();
+
+        index_t get_weight() const;
+
+    private:
+        global_weight_t &global_weight_;
+        std::shared_ptr<index_t> count_index_;
+
+        index_t local_weigths_;
+        index_t global_weights_;
 
     };
 

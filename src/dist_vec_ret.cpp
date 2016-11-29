@@ -7,8 +7,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <algorithm>
+#include <numeric>
 
-namespace information_retrieval{
+namespace information_retrieval {
 
     word_counter::word_counter(std::string query) {
         this->input_stream_ = std::make_unique<std::stringstream>(query);
@@ -19,32 +20,60 @@ namespace information_retrieval{
         if (isindexed())
             return;
 
-        index_t new_index;
-        size_t new_word_count;
-        for(std::string word; *input_stream_ >> word;){
+        auto new_index = std::make_shared<index_t>();
+        for (std::string word; *input_stream_ >> word;) {
             stemming(word);
-            new_index[word] += 1;
-            new_word_count += 1;
+            (*new_index)[word] += 1;
         }
 
         this->last_generated_index_ = new_index;
-        this->word_count_ = new_word_count;
         this->isindexed_ = true;
     }
 
-    index_t word_counter::get_index() const {
+    std::shared_ptr<index_t> word_counter::get_index() const {
         if (!this->isindexed_)
             throw std::logic_error("Call update_index at least once before trying to get the index");
         return this->last_generated_index_;
     }
 
-    size_t word_counter::get_word_count() const {
-        if (!this->isindexed_)
-            throw std::logic_error("Call update_index at least once before trying to get the index");
-        return this->word_count_;
-    }
 
     void word_counter::stemming(std::string &word) {
-        std::for_each(word.begin(),word.end(),[](char &c){c = std::tolower(c);});
+        std::for_each(word.begin(), word.end(), [](char &c) { c = std::tolower(c); });
     }
+
+    index_t weighter::get_weight() const {
+        index_t final_weights;
+        const auto local_global_correlation = [](const index_t::mapped_type &local,
+                                                 const index_t::mapped_type &global) ->
+                index_t::mapped_type {
+            return local * global;
+        };
+
+        std::transform(this->local_weigths_.cbegin(), this->local_weigths_.cend(), this->global_weights_.cbegin(),
+                       std::inserter(final_weights, final_weights.end()), [&local_global_correlation]
+                               (const index_t::value_type &local, const index_t::value_type &global) {
+                    return std::make_pair(local.first, local_global_correlation(local.second, global.second));
+                });
+        return information_retrieval::index_t();
+    }
+
+    void weighter::local_weighting() {
+        const uint_fast64_t word_count = std::accumulate(count_index_->cbegin(), count_index_->cend(), 0,
+                                                         [](const uint_fast64_t &prev,
+                                                            const index_t::value_type &next) {
+                                                             return prev + next.second;
+                                                         });
+        index_t local_weigths;
+        std::transform(count_index_->cbegin(), count_index_->cend(),
+                       std::inserter(local_weigths, local_weigths.end()),
+                       [&word_count](const index_t::value_type &word) {
+                           return std::make_pair(word.first, word.second / word_count);
+                       });
+        this->local_weigths_ = local_weigths;
+    }
+
+    void weighter::global_weighting() {
+
+    }
+
 }
