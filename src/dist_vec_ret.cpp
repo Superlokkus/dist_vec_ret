@@ -42,20 +42,20 @@ namespace information_retrieval {
         std::for_each(word.begin(), word.end(), [](char &c) { c = std::tolower(c); });
     }
 
-    count_index_t weighter::get_weight() const {
-        count_index_t final_weights;
-        const auto local_global_correlation = [](const count_index_t::mapped_type &local,
-                                                 const count_index_t::mapped_type &global) ->
+    weight_index_t weighter::get_weight() const {
+        weight_index_t final_weights;
+        const auto local_global_correlation = [](const weight_index_t::mapped_type &local,
+                                                 const weight_index_t::mapped_type &global) ->
                 count_index_t::mapped_type {
             return local * global;
         };
 
         std::transform(this->local_weights_.cbegin(), this->local_weights_.cend(), this->global_weights_.cbegin(),
                        std::inserter(final_weights, final_weights.end()), [&local_global_correlation]
-                               (const count_index_t::value_type &local, const count_index_t::value_type &global) {
+                               (const weight_index_t::value_type &local, const weight_index_t::value_type &global) {
                     return std::make_pair(local.first, local_global_correlation(local.second, global.second));
                 });
-        return information_retrieval::count_index_t();
+        return final_weights;
     }
 
     void weighter::local_weighting() {

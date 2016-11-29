@@ -75,7 +75,7 @@ namespace information_retrieval {
 
         void global_weighting();
 
-        count_index_t get_weight() const;
+        weight_index_t get_weight() const;
 
     private:
         global_weight_t &global_weight_;
