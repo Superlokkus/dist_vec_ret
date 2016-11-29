@@ -11,8 +11,9 @@
 
 namespace information_retrieval {
 
-    word_counter::word_counter(std::string query) {
-        this->input_stream_ = std::make_unique<std::stringstream>(query);
+    word_counter::word_counter(std::string query)
+            : input_stream_(
+            new std::stringstream(query)) { //no make_unique thanks to damn old gcc4.8.5. on target system
     }
 
 
