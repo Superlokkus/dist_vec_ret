@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 
 namespace information_retrieval {
@@ -74,7 +75,18 @@ namespace information_retrieval {
     }
 
     void weighter::global_weighting() {
+        weight_index_t global_weights;
 
+        std::transform(count_index_->cbegin(), count_index_->cend(),
+                       std::inserter(global_weights, global_weights.end()),
+                       [this](const weight_index_t::value_type &word) {
+                           weight_index_t::mapped_type weight =
+                                   std::log(global_weight_.get_total_document_count() /
+                                            global_weight_.get_document_count_with(word.first));
+                           return std::make_pair(word.first, std::move(weight));
+                       });
+
+        this->global_weights_ = global_weights;
     }
 
 
