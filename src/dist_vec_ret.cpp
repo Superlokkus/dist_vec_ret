@@ -41,7 +41,7 @@ namespace information_retrieval {
         std::for_each(word.begin(), word.end(), [](char &c) { c = std::tolower(c); });
     }
 
-    count_index_t weigther::get_weight() const {
+    count_index_t weighter::get_weight() const {
         count_index_t final_weights;
         const auto local_global_correlation = [](const count_index_t::mapped_type &local,
                                                  const count_index_t::mapped_type &global) ->
@@ -57,22 +57,22 @@ namespace information_retrieval {
         return information_retrieval::count_index_t();
     }
 
-    void weigther::local_weighting() {
+    void weighter::local_weighting() {
         const uint_fast64_t word_count = std::accumulate(count_index_->cbegin(), count_index_->cend(), 0,
                                                          [](const uint_fast64_t &prev,
                                                             const count_index_t::value_type &next) {
                                                              return prev + next.second;
                                                          });
-        weigth_index_t local_weigths;
+        weight_index_t local_weigths;
         std::transform(count_index_->cbegin(), count_index_->cend(),
                        std::inserter(local_weigths, local_weigths.end()),
-                       [&word_count](const weigth_index_t::value_type &word) {
+                       [&word_count](const weight_index_t::value_type &word) {
                            return std::make_pair(word.first, word.second / word_count);
                        });
         this->local_weigths_ = local_weigths;
     }
 
-    void weigther::global_weighting() {
+    void weighter::global_weighting() {
 
     }
 
