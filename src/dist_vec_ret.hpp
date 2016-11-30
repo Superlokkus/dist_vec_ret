@@ -44,6 +44,9 @@ namespace information_retrieval {
         std::shared_ptr<count_index_t> last_generated_index_;
     };
 
+    /*! This class provides all data needed for global weighting
+     * @todo This class must be adapted for the further highly distributed and concurrent use
+     */
     class global_weight_state_t {
     public:
         using count_t = uint_fast64_t;
@@ -51,13 +54,18 @@ namespace information_retrieval {
 
         count_t get_total_document_count() const;
 
-        count_t get_document_count_with(string_t word) const;
+        count_t get_document_count_with(const string_t &word) const;
 
-        count_t get_document_count_with(std::set<string_t> word) const;
+        count_t get_document_count_with(const std::set<string_t> &word) const;
 
-        void update_document(const document_id_t &document_id, std::shared_ptr<count_index_t> count_index);
+        void update_document(const document_id_t &document_id, const count_index_t &count_index);
 
         void remove_document(const document_id_t &document_id);
+
+    private:
+        std::map<count_index_t::key_type, count_t> document_count_per_word_;///@todo idea maybe replace count by set:documents.size
+        std::map<document_id_t, std::set<count_index_t::key_type>> words_per_document_;
+
     };
 
     class weighter {

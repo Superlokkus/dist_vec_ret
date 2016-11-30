@@ -96,19 +96,36 @@ namespace information_retrieval {
 
 
     global_weight_state_t::count_t global_weight_state_t::get_total_document_count() const {
-        return 0;
+        return this->words_per_document_.size();
     }
 
-    global_weight_state_t::count_t global_weight_state_t::get_document_count_with(string_t word) const {
-        return 0;
+    global_weight_state_t::count_t global_weight_state_t::get_document_count_with(const string_t &word) const {
+        return this->document_count_per_word_.at(word);
     }
 
-    global_weight_state_t::count_t global_weight_state_t::get_document_count_with(std::set<string_t> word) const {
-        return 0;
+    global_weight_state_t::count_t
+    global_weight_state_t::get_document_count_with(const std::set<string_t> &word) const {
+        count_t count = 0;
+        for (const auto &w : word) {
+            const auto document_count_for_this_word = this->document_count_per_word_.find(w);
+            count += (document_count_for_this_word != document_count_per_word_.cend())
+                     ? document_count_for_this_word->second : 0;
+        }
+        return count;
     }
 
     void global_weight_state_t::update_document(const global_weight_state_t::document_id_t &document_id,
-                                                std::shared_ptr<count_index_t> count_index) {
+                                                const count_index_t &count_index) {
+        ///@todo this method should be improved by might better class design
+        std::transform(count_index.cbegin(), count_index.cend(),
+                       std::inserter(words_per_document_[document_id], words_per_document_[document_id].end()),
+                       [](const count_index_t::value_type &word_count_par) {
+                           return word_count_par.first;
+                       });
+
+        for (const auto &word : words_per_document_[document_id]) {
+            ++document_count_per_word_[word];
+        }
 
     }
 

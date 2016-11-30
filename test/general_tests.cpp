@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE(global_weight) {
     auto global_weight_state_1 = std::make_shared<information_retrieval::global_weight_state_t>();
 
     auto uuid1{boost::uuids::random_generator{}()}, uuid2{boost::uuids::random_generator{}()};
-    global_weight_state_1->update_document(uuid1, index1.word_index);
-    global_weight_state_1->update_document(uuid2, index2.word_index);
+    global_weight_state_1->update_document(uuid1, *index1.word_index);
+    global_weight_state_1->update_document(uuid2, *index2.word_index);
 
     weight_index_t global_weight1, global_weight2;
     weighter w1{global_weight_state_1, index1.word_index}, w2{global_weight_state_1, index2.word_index};
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(global_weight) {
     w2.global_weighting(global_weight2);
 
 
-    BOOST_CHECK_EQUAL(global_weight1["test"], std::log(2.0 / 3.0));
+    BOOST_CHECK_EQUAL(global_weight1["test"], std::log(2.0 / 2.0));
     BOOST_CHECK_EQUAL(global_weight1["test"], global_weight2["test"]);
     BOOST_CHECK_EQUAL(global_weight2["different"], std::log(2.0 / 1.0));
 
