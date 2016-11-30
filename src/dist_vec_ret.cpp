@@ -77,36 +77,42 @@ namespace information_retrieval {
     void weighter::global_weighting() {
         weight_index_t global_weights;
 
+        const auto global_weight_func = [this](const weight_index_t::value_type &word) {
+            weight_index_t::mapped_type weight =
+                    std::log(
+                            static_cast<weight_index_t::mapped_type>(global_weight_state_->get_total_document_count())
+                            /
+                            static_cast<weight_index_t::mapped_type>(global_weight_state_->get_document_count_with(
+                                    word.first)));
+            return std::make_pair(word.first, std::move(weight));
+        };
+
         std::transform(count_index_->cbegin(), count_index_->cend(),
                        std::inserter(global_weights, global_weights.end()),
-                       [this](const weight_index_t::value_type &word) {
-                           weight_index_t::mapped_type weight =
-                                   std::log(global_weight_.get_total_document_count() /
-                                            global_weight_.get_document_count_with(word.first));
-                           return std::make_pair(word.first, std::move(weight));
-                       });
+                       global_weight_func);
 
         this->global_weights_ = global_weights;
     }
 
 
-    global_weight_t::count_t global_weight_t::get_total_document_count() const {
+    global_weight_state_t::count_t global_weight_state_t::get_total_document_count() const {
         return 0;
     }
 
-    global_weight_t::count_t global_weight_t::get_document_count_with(string_t word) const {
+    global_weight_state_t::count_t global_weight_state_t::get_document_count_with(string_t word) const {
         return 0;
     }
 
-    global_weight_t::count_t global_weight_t::get_document_count_with(std::set<string_t> word) const {
+    global_weight_state_t::count_t global_weight_state_t::get_document_count_with(std::set<string_t> word) const {
         return 0;
     }
 
-    void global_weight_t::update_document(const global_weight_t::document_id_t &document_id, count_index_t) {
+    void global_weight_state_t::update_document(const global_weight_state_t::document_id_t &document_id,
+                                                std::shared_ptr<count_index_t> count_index) {
 
     }
 
-    void global_weight_t::remove_document(const global_weight_t::document_id_t &document_id) {
+    void global_weight_state_t::remove_document(const global_weight_state_t::document_id_t &document_id) {
 
     }
 

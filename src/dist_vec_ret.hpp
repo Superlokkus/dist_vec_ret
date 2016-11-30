@@ -44,7 +44,7 @@ namespace information_retrieval {
         std::shared_ptr<count_index_t> last_generated_index_;
     };
 
-    class global_weight_t {
+    class global_weight_state_t {
     public:
         using count_t = uint_fast64_t;
         using document_id_t = boost::uuids::uuid;
@@ -55,15 +55,16 @@ namespace information_retrieval {
 
         count_t get_document_count_with(std::set<string_t> word) const;
 
-        void update_document(const document_id_t &document_id, count_index_t);
+        void update_document(const document_id_t &document_id, std::shared_ptr<count_index_t> count_index);
 
         void remove_document(const document_id_t &document_id);
     };
 
     class weighter {
     public:
-        explicit weighter(global_weight_t &global_weight, std::shared_ptr<count_index_t> count_index) :
-                global_weight_(global_weight), count_index_(count_index) {
+        explicit weighter(std::shared_ptr<global_weight_state_t> global_weight,
+                          std::shared_ptr<count_index_t> count_index) :
+                global_weight_state_(global_weight), count_index_(count_index) {
         }
 
         void local_weighting();
@@ -75,10 +76,15 @@ namespace information_retrieval {
 
         void global_weighting();
 
+        void global_weighting(weight_index_t &for_debug_purposes) {
+            global_weighting();
+            for_debug_purposes = global_weights_;
+        }
+
         weight_index_t get_weight() const;
 
     private:
-        global_weight_t &global_weight_;
+        std::shared_ptr<global_weight_state_t> global_weight_state_;
         std::shared_ptr<count_index_t> count_index_;
 
         weight_index_t local_weights_;
