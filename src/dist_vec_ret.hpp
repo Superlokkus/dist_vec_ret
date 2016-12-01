@@ -106,9 +106,9 @@ namespace information_retrieval {
 
     inline distance_t calc_distance(const weight_index_t &document1, const weight_index_t &document2) {
         std::vector<weight_index_t::value_type> common_weights; ///@todo idea: maybe constexpr func, by using std::array<y,document1.size()>
-        std::set_intersection(document1.cbegin(), document1.cend(),
-                              document2.cbegin(), document2.cend(),
-                              std::back_inserter(common_weights));
+        std::set_union(document1.cbegin(), document1.cend(),
+                       document2.cbegin(), document2.cend(),
+                       std::back_inserter(common_weights));
 
         distance_t scalar_product = 0, norm_sum1 = 0, norm_sum2 = 0;
 
