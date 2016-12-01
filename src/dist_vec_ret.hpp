@@ -9,7 +9,9 @@
 #include <memory>
 #include <map>
 #include <set>
+#include <vector>
 #include <cstdint>
+#include <cmath>
 #include <boost/uuid/uuid.hpp>
 
 namespace information_retrieval {
@@ -99,6 +101,26 @@ namespace information_retrieval {
         weight_index_t global_weights_;
 
     };
+
+    using distance_t = double;
+
+    inline distance_t calc_distance(const weight_index_t &document1, const weight_index_t &document2) {
+        std::vector<weight_index_t::value_type> common_weights; ///@todo idea: maybe constexpr func, by using std::array<y,document1.size()>
+        std::set_intersection(document1.cbegin(), document1.cend(),
+                              document2.cbegin(), document2.cend(),
+                              std::back_inserter(common_weights));
+
+        distance_t scalar_product = 0, norm_sum1 = 0, norm_sum2 = 0;
+
+        for (const auto &word: common_weights) {
+            scalar_product += document1.at(word.first) * document2.at(word.first);
+            norm_sum1 += std::pow(document1.at(word.first), 2);
+            norm_sum2 += std::pow(document2.at(word.first), 2);
+        }
+
+        return scalar_product / (std::sqrt(norm_sum1) * std::sqrt(norm_sum2));
+    }
+
 
 }
 
