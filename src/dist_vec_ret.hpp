@@ -12,6 +12,7 @@
 #include <vector>
 #include <cstdint>
 #include <cmath>
+#include <algorithm>
 #include <boost/uuid/uuid.hpp>
 
 namespace information_retrieval {
