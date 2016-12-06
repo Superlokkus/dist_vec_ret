@@ -18,8 +18,8 @@ make test
 ```
 
 Ilux150/HTW Linux Hosts:
-CMake automatically finds boost and mpi if boost installed in `$HOME/include` and `$HOME/lib`, 
-and MPI in the case for example mpich in `$HOME/mpich-install. So building should be as easy as above.
+CMake automatically finds boost and mpi, even if installed in `$HOME/include` and `$HOME/lib`, 
+and MPI also in the case for example mpich in `$HOME/mpich-install. So building should be as easy as above.
 
 Should mpi not be found one has to set the 2 CMake cache variables MPI_C_LIBRARIES and MPI_C_INCLUDE_PATH for C 
 and MPI_CXX_LIBRARIES and MPI_CXX_INCLUDE_PATH for C++. 
