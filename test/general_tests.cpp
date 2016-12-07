@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(global_weight) {
     using namespace information_retrieval;
     auto global_weight_state_1 = std::make_shared<information_retrieval::global_weight_state_t>();
 
-    auto uuid1{boost::uuids::random_generator{}()}, uuid2{boost::uuids::random_generator{}()};
+    boost::uuids::uuid uuid1 = boost::uuids::random_generator()(), uuid2 = boost::uuids::random_generator()();
     global_weight_state_1->update_document(uuid1, *index1.word_index);
     global_weight_state_1->update_document(uuid2, *index2.word_index);
 
