@@ -21,6 +21,9 @@ namespace information_retrieval {
     using count_index_t = std::map<string_t, uint_fast32_t>;
     using weight_index_t = std::map<string_t, double>;
 
+    /*! Class for calculating a stemmed word count vector, heavy lifting is done in @ref update_index
+     *
+     */
     class word_counter {
     public:
 
@@ -30,12 +33,20 @@ namespace information_retrieval {
 
         }
 
+        /*!
+         *
+         * @returns True if @ref update_index has been called at least once, otherweise false
+         */
         bool isindexed() const noexcept {
             return this->isindexed_;
         }
 
         void update_index();
 
+        /*! @throws std::logic_error If @isindexed retunrs false
+         *
+         * @return The word count index
+         */
         std::shared_ptr<count_index_t> get_index() const;
 
         static void stemming(std::string &word);
@@ -55,6 +66,8 @@ namespace information_retrieval {
         using count_t = uint_fast64_t;
         using document_id_t = boost::uuids::uuid;
 
+        explicit global_weight_state_t() = default;
+
         count_t get_total_document_count() const;
 
         count_t get_document_count_with(const string_t &word) const;
@@ -71,35 +84,48 @@ namespace information_retrieval {
 
     };
 
+    /*! This class takes all data for weighting a given word vector. The heavy lifting aka weighting is then done in
+     * @ref local_weighting and @ref global_weighting which can be called independently but must be called
+     * before @ref get_weight
+     */
     class weighter {
     public:
-        explicit weighter(std::shared_ptr<global_weight_state_t> global_weight,
+        explicit weighter(std::shared_ptr<global_weight_state_t> global_weight_state,
                           std::shared_ptr<count_index_t> count_index) :
-                global_weight_state_(global_weight), count_index_(count_index) {
+                global_weight_state_(global_weight_state), count_index_(count_index) {
         }
 
         void local_weighting();
 
         void local_weighting(weight_index_t &for_debug_purposes) {
             local_weighting();
-            for_debug_purposes = local_weights_;
+            for_debug_purposes = *local_weights_;
         }
 
         void global_weighting();
 
         void global_weighting(weight_index_t &for_debug_purposes) {
             global_weighting();
-            for_debug_purposes = global_weights_;
+            for_debug_purposes = *global_weights_;
         }
 
-        weight_index_t get_weight() const;
+        bool ischached() const {
+            return final_weight_.operator bool();
+        }
+
+        /*! @brief Returns the final weight vector and calculates it if not already done
+         *
+         * @returns The final weight vector
+         */
+        std::shared_ptr<weight_index_t> get_weight();
 
     private:
         std::shared_ptr<global_weight_state_t> global_weight_state_;
         std::shared_ptr<count_index_t> count_index_;
+        std::shared_ptr<weight_index_t> final_weight_;
 
-        weight_index_t local_weights_;
-        weight_index_t global_weights_;
+        std::unique_ptr<weight_index_t> local_weights_;
+        std::unique_ptr<weight_index_t> global_weights_;
 
     };
 
