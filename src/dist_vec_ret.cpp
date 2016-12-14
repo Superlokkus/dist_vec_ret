@@ -57,7 +57,7 @@ namespace information_retrieval {
         auto final_weights = std::make_shared<weight_index_t>();
         const auto local_global_correlation = [](const weight_index_t::mapped_type &local,
                                                  const weight_index_t::mapped_type &global) ->
-                count_index_t::mapped_type {
+                weight_index_t::mapped_type {
             return local * global;
         };
 

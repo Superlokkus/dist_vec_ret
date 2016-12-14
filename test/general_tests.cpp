@@ -94,12 +94,12 @@ struct weight_fixture2 {
         global_weight_state_1->update_document(uuid2, *index2.get_index());
 
 
-        weighter w1{global_weight_state_1, index1.get_index()}, w2{global_weight_state_1, index1.get_index()};
+        weighter w1{global_weight_state_1, index1.get_index()}, w2{global_weight_state_1, index2.get_index()};
 
         this->weight1 = w1.get_weight(), this->weight2 = w2.get_weight();
     }
 
-    decltype(std::declval<information_retrieval::weighter>().get_weight()) weight1, weight2;
+    std::shared_ptr<information_retrieval::weight_index_t> weight1, weight2;
 
 };
 
