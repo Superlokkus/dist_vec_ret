@@ -140,12 +140,13 @@ namespace information_retrieval {
         distance_t scalar_product = 0, norm_sum1 = 0, norm_sum2 = 0;
 
         for (const auto &word: common_weights) {
-            scalar_product += document1.at(word.first) * document2.at(word.first);
-            norm_sum1 += std::pow(document1.at(word.first), 2);
-            norm_sum2 += std::pow(document2.at(word.first), 2);
+            const auto w1 = document1.count(word.first) ? document1.at(word.first) : 0.0;
+            const auto w2 = document2.count(word.first) ? document2.at(word.first) : 0.0;
+            scalar_product += w1 * w2;
+            norm_sum1 += std::pow(w1, 2);
+            norm_sum2 += std::pow(w2, 2);
         }
-
-        return scalar_product / (std::sqrt(norm_sum1) * std::sqrt(norm_sum2));
+        return (norm_sum1 > 0 && norm_sum2 > 0) ? scalar_product / (std::sqrt(norm_sum1) * std::sqrt(norm_sum2)) : 0;
     }
 
 

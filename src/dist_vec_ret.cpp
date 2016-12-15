@@ -96,12 +96,18 @@ namespace information_retrieval {
         std::unique_ptr<weight_index_t> global_weights{new weight_index_t()};
 
         const auto global_weight_func = [this](const weight_index_t::value_type &word) {
-            weight_index_t::mapped_type weight =
-                    std::log(
-                            static_cast<weight_index_t::mapped_type>(global_weight_state_->get_total_document_count())
-                            /
-                            static_cast<weight_index_t::mapped_type>(global_weight_state_->get_document_count_with(
-                                    word.first)));
+            const weight_index_t::mapped_type document_count{static_cast<weight_index_t::mapped_type>
+                                                             (global_weight_state_->get_total_document_count())};
+            const weight_index_t::mapped_type document_count_with_word{static_cast<weight_index_t::mapped_type>
+                                                                       (global_weight_state_->get_document_count_with(
+                            word.first))};
+            weight_index_t::mapped_type weight = (document_count > 0 && document_count_with_word > 0) ?
+                                                 std::log(
+                                                         document_count
+                                                         /
+                                                         document_count_with_word
+                                                 )
+                                                                                                      : 0;
             return std::make_pair(word.first, std::move(weight));
         };
 

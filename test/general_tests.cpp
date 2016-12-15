@@ -80,26 +80,36 @@ struct weight_fixture2 {
             "This is a total different test query"
     ) {}
 
-    weight_fixture2(std::string string1, std::string string2) {
+    weight_fixture2(std::string string1, std::string string2,
+                    std::shared_ptr<information_retrieval::global_weight_state_t> shared_weight_state
+                    = std::make_shared<information_retrieval::global_weight_state_t>()) {
         using namespace information_retrieval;
 
         word_counter index1{string1}, index2{string2};
         index1.update_index();
         index2.update_index();
 
-        auto global_weight_state_1 = std::make_shared<information_retrieval::global_weight_state_t>();
 
         boost::uuids::uuid uuid1 = boost::uuids::random_generator()(), uuid2 = boost::uuids::random_generator()();
-        global_weight_state_1->update_document(uuid1, *index1.get_index());
-        global_weight_state_1->update_document(uuid2, *index2.get_index());
+        shared_weight_state->update_document(uuid1, *index1.get_index());
+        shared_weight_state->update_document(uuid2, *index2.get_index());
 
 
-        weighter w1{global_weight_state_1, index1.get_index()}, w2{global_weight_state_1, index2.get_index()};
+        w1.reset(new information_retrieval::weighter{shared_weight_state, index1.get_index()});
+        w2.reset(new information_retrieval::weighter{shared_weight_state, index2.get_index()});
 
-        this->weight1 = w1.get_weight(), this->weight2 = w2.get_weight();
     }
 
-    std::shared_ptr<information_retrieval::weight_index_t> weight1, weight2;
+    std::shared_ptr<information_retrieval::weight_index_t> weight1() {
+        return w1->get_weight();
+    }
+
+    std::shared_ptr<information_retrieval::weight_index_t> weight2() {
+        return w2->get_weight();
+    }
+
+private:
+    std::unique_ptr<information_retrieval::weighter> w1, w2;
 
 };
 
@@ -110,14 +120,22 @@ BOOST_AUTO_TEST_CASE(final_weight) {
         weighter empty_weighter{std::shared_ptr<global_weight_state_t>{}, std::shared_ptr<count_index_t>{}};
         BOOST_CHECK_EQUAL(empty_weighter.ischached(), false);
     }
-    BOOST_CHECK_CLOSE(wf.weight1->at("test"), 0.0, 0.1);
-    BOOST_CHECK_CLOSE(wf.weight1->at("for"), 0.063, 10);
+    BOOST_CHECK_CLOSE(wf.weight1()->at("test"), 0.0, 0.1);
+    BOOST_CHECK_CLOSE(wf.weight1()->at("for"), 0.063, 1);
 }
 
 BOOST_AUTO_TEST_CASE(distance) {
     using namespace information_retrieval;
     weight_fixture2 wf{};
-    BOOST_CHECK_CLOSE(calc_distance(*wf.weight1, *wf.weight2), 1, 10);
+    BOOST_CHECK_CLOSE(calc_distance(*wf.weight1(), *wf.weight1()), 1, 1);
+
+    weight_fixture2 wf2{"These strings", "have nothing in common"};
+    BOOST_CHECK_CLOSE(calc_distance(*wf2.weight1(), *wf2.weight2()), 0, 1);
+
+    auto shared_state_3_4 = std::make_shared<information_retrieval::global_weight_state_t>();
+    weight_fixture2 wf3{"One word common", "in this one this one example", shared_state_3_4};
+    weight_fixture2 wf4{"but", "not here", shared_state_3_4};
+    BOOST_CHECK_CLOSE(calc_distance(*wf3.weight1(), *wf3.weight2()), 0.1259, 1);
 
 }
 
