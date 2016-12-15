@@ -19,6 +19,7 @@ set_property(TARGET dist_vec_ret_lib PROPERTY LINKER_LANGUAGE CXX)
 set_property(TARGET dist_vec_ret_lib PROPERTY CXX_STANDARD 14)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/mpi)
+add_subdirectory(${PROJECT_SOURCE_DIR}/test_cli)
 
 enable_testing()
 add_subdirectory(test)
