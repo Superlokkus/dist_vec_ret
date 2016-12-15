@@ -26,15 +26,11 @@ namespace information_retrieval {
      */
     class word_counter {
     public:
-
         explicit word_counter(std::string query);
 
-        explicit word_counter(std::unique_ptr<std::istream> &&input_stream) : input_stream_(std::move(input_stream)) {
-
-        }
+        explicit word_counter(std::unique_ptr<std::istream> &&input_stream) : input_stream_(std::move(input_stream)) {}
 
         /*!
-         *
          * @returns True if @ref update_index has been called at least once, otherweise false
          */
         bool isindexed() const noexcept {
@@ -50,7 +46,6 @@ namespace information_retrieval {
         std::shared_ptr<count_index_t> get_index() const;
 
         static void stemming(std::string &word);
-
     private:
         bool isindexed_ = false;
 
@@ -69,13 +64,10 @@ namespace information_retrieval {
         explicit global_weight_state_t() = default;
 
         count_t get_total_document_count() const;
-
         count_t get_document_count_with(const string_t &word) const;
-
         count_t get_document_count_with(const std::set<string_t> &word) const;
 
         void update_document(const document_id_t &document_id, const count_index_t &count_index);
-
         void remove_document(const document_id_t &document_id);
 
     private:
@@ -96,14 +88,12 @@ namespace information_retrieval {
         }
 
         void local_weighting();
-
         void local_weighting(weight_index_t &for_debug_purposes) {
             local_weighting();
             for_debug_purposes = *local_weights_;
         }
 
         void global_weighting();
-
         void global_weighting(weight_index_t &for_debug_purposes) {
             global_weighting();
             for_debug_purposes = *global_weights_;
@@ -126,7 +116,6 @@ namespace information_retrieval {
 
         std::unique_ptr<weight_index_t> local_weights_;
         std::unique_ptr<weight_index_t> global_weights_;
-
     };
 
     using distance_t = double;
@@ -148,7 +137,6 @@ namespace information_retrieval {
         }
         return (norm_sum1 > 0 && norm_sum2 > 0) ? scalar_product / (std::sqrt(norm_sum1) * std::sqrt(norm_sum2)) : 0;
     }
-
 
 }
 
