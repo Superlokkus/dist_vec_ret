@@ -24,8 +24,8 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
         fileapi::path path_to_index{argv[1]};
-        for (const auto &entry : path_to_index) {
-            std::cout << entry.filename() << "\n";
+        for (const auto &entry : fileapi::directory_iterator(path_to_index)) {
+            std::cout << entry.path() << "\n";
         }
 
     }
