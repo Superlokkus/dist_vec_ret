@@ -46,6 +46,8 @@ namespace information_retrieval {
 
         void add_document(document_meta_t meta_data, boost::filesystem::path path_to_file);
 
+        bool remove_document(const decltype(document_meta_t::id) &id) noexcept;
+
         /*!
          * @param query
          * @return The documents with distance, sorted

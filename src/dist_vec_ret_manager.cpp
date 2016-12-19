@@ -30,13 +30,13 @@ information_retrieval::dist_vec_ret_manager::find_match_for(std::string query) {
     return std::vector<std::tuple<information_retrieval::distance_t, information_retrieval::dist_vec_ret_manager::document_meta_t>>();
 }
 
-information_retrieval::dist_vec_ret_manager::document_meta_t::document_meta_t() : id{boost::uuids::nil_uuid()} {
-
+information_retrieval::dist_vec_ret_manager::document_meta_t::document_meta_t() {
+    this->id = boost::uuids::nil_uuid();
 }
 
 information_retrieval::dist_vec_ret_manager::document_meta_t::document_meta_t(boost::filesystem::path path_to_file) :
-        common_name{path_to_file.filename().string()},
-        id{boost::uuids::name_generator(get_namespace_uuid())(path_to_file.string())} {
+        common_name{path_to_file.filename().string()} {
+    this->id = boost::uuids::name_generator(get_namespace_uuid())(path_to_file.string());
 }
 
 boost::uuids::uuid information_retrieval::dist_vec_ret_manager::document_meta_t::get_namespace_uuid() {
