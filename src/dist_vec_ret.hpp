@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <cmath>
 #include <algorithm>
+#include <istream>
 #include <boost/uuid/uuid.hpp>
 
 namespace information_retrieval {
@@ -28,7 +29,7 @@ namespace information_retrieval {
     public:
         explicit word_counter(std::string query);
 
-        explicit word_counter(std::unique_ptr<std::istream> &&input_stream) : input_stream_(std::move(input_stream)) {}
+        explicit word_counter(std::shared_ptr<std::istream> input_stream) : input_stream_(input_stream) {}
 
         /*!
          * @returns True if @ref update_index has been called at least once, otherweise false
@@ -49,7 +50,7 @@ namespace information_retrieval {
     private:
         bool isindexed_ = false;
 
-        std::unique_ptr<std::istream> input_stream_;
+        std::shared_ptr<std::istream> input_stream_;
         std::shared_ptr<count_index_t> last_generated_index_;
     };
 

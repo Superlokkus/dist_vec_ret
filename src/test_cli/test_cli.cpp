@@ -5,14 +5,12 @@
 #include <iostream>
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED
-
 #include <boost/filesystem.hpp>
 
-namespace fileapi = boost::filesystem;
-
 #include <dist_vec_ret.hpp>
+#include <dist_vec_ret_manager.hpp>
 
-
+namespace fileapi = boost::filesystem;
 int main(int argc, char *argv[]) {
     try {
         if (argc != 2) {
@@ -24,8 +22,15 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
         fileapi::path path_to_index{argv[1]};
+
+        auto global_state = std::make_shared<information_retrieval::global_weight_state_t>();
+        auto manager = information_retrieval::dist_vec_ret_manager{global_state};
+
         for (const auto &entry : fileapi::directory_iterator(path_to_index)) {
-            std::cout << entry.path() << "\n";
+            if (fileapi::is_regular_file(entry)) {
+                std::cout << "Adding " << entry.path().filename() << "\n";
+                manager.add_document(entry.path(), entry.path());
+            }
         }
 
     }
