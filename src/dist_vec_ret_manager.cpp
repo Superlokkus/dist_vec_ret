@@ -22,12 +22,26 @@ void information_retrieval::dist_vec_ret_manager::add_document(
     //TODO profiling via std::chrono?!
     count.update_index();
     this->global_state_->update_document(meta_data.id, *count.get_index());
+    information_retrieval::weighter weight{global_state_, count.get_index()};
+    this->weights_[meta_data.id] = weight.get_weight();
+    this->meta_data_[meta_data.id] = std::move(meta_data);
 
 }
 
 std::vector<std::tuple<information_retrieval::distance_t, information_retrieval::dist_vec_ret_manager::document_meta_t>>
-information_retrieval::dist_vec_ret_manager::find_match_for(std::string query) {
-    return std::vector<std::tuple<information_retrieval::distance_t, information_retrieval::dist_vec_ret_manager::document_meta_t>>();
+information_retrieval::dist_vec_ret_manager::find_match_for(const std::string &query) {
+    using namespace information_retrieval;
+    std::vector<std::tuple<distance_t, dist_vec_ret_manager::document_meta_t>> results;
+    word_counter count{query};
+    count.update_index();
+    weighter weighter{global_state_, count.get_index()};
+    auto weight = weighter.get_weight();
+
+    for (const auto &doc : weights_) {
+        results.emplace_back(std::forward_as_tuple(calc_distance(*weight, *doc.second), meta_data_[doc.first]));
+    }
+
+    return results;
 }
 
 information_retrieval::dist_vec_ret_manager::document_meta_t::document_meta_t() {

@@ -10,6 +10,8 @@
 #include <dist_vec_ret.hpp>
 #include <dist_vec_ret_manager.hpp>
 
+#include <algorithm>
+
 namespace fileapi = boost::filesystem;
 int main(int argc, char *argv[]) {
     try {
@@ -31,6 +33,15 @@ int main(int argc, char *argv[]) {
                 std::cout << "Adding " << entry.path().filename() << "\n";
                 manager.add_document(entry.path(), entry.path());
             }
+        }
+        std::cout << "\n Finished indexing, please state your query to match: " << std::endl;
+        std::string query;
+        std::cin >> query;
+        auto results = manager.find_match_for(query);
+        std::sort(results.begin(), results.end(),
+                  [](const auto &l, const auto &r) -> bool { return std::get<0>(l) < std::get<0>(r); });
+        for (const auto &doc : results) {
+            std::cout << std::get<1>(doc).common_name << ": " << std::get<0>(doc) << "\n";
         }
 
     }

@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <map>
 #include <boost/uuid/uuid.hpp>
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED
@@ -50,13 +51,15 @@ namespace information_retrieval {
 
         /*!
          * @param query
-         * @return The documents with distance, sorted
+         * @return The documents with distance
          */
-        std::vector<std::tuple<distance_t, document_meta_t>> find_match_for(std::string query);
+        std::vector<std::tuple<distance_t, document_meta_t>> find_match_for(const std::string &query);
 
 
     private:
         std::shared_ptr<global_weight_state_t> global_state_;
+        std::map<boost::uuids::uuid, std::shared_ptr<weight_index_t>> weights_;
+        std::map<boost::uuids::uuid, document_meta_t> meta_data_;
     };
 
 }
