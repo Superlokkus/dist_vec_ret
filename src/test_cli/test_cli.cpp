@@ -37,7 +37,6 @@ int main(int argc, char *argv[]) {
         std::cout << "\n Finished indexing, please state your query to match: " << std::endl;
         std::string query;
         while (std::getline(std::cin, query)) {
-            std::cin.clear();
             auto results = manager.find_match_for(query);
             std::sort(results.begin(), results.end(),
                       [](const auto &l, const auto &r) -> bool { return std::get<0>(l) < std::get<0>(r); });
