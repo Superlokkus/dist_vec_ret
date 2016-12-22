@@ -124,7 +124,7 @@ namespace information_retrieval {
     }
 
     global_weight_state_t::count_t global_weight_state_t::get_document_count_with(const string_t &word) const {
-        return this->document_count_per_word_.at(word);
+        return (document_count_per_word_.count(word) != 0) ? this->document_count_per_word_.at(word) : 0;
     }
 
     global_weight_state_t::count_t
