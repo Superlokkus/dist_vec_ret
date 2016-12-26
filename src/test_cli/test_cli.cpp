@@ -39,7 +39,8 @@ int main(int argc, char *argv[]) {
         while (std::getline(std::cin, query)) {
             auto results = manager.find_match_for(query);
             std::sort(results.begin(), results.end(),
-                      [](const auto &l, const auto &r) -> bool { return std::get<0>(l) < std::get<0>(r); });
+                      [](const decltype(results)::value_type &l, const decltype(results)::value_type &r)
+                              -> bool { return std::get<0>(l) < std::get<0>(r); });
             std::cout << "Reults by ascending match order: \n";
             for (const auto &doc : results) {
                 std::cout << std::get<1>(doc).common_name << ": " << std::get<0>(doc) << "\n";
