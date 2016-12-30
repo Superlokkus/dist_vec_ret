@@ -29,7 +29,7 @@ namespace information_retrieval {
     public:
         explicit word_counter(std::string query);
 
-        explicit word_counter(std::shared_ptr<std::istream> input_stream) : input_stream_(input_stream) {}
+        explicit word_counter(std::shared_ptr<std::istream> input_stream) : input_stream_(std::move(input_stream)) {}
 
         /*!
          * @returns True if @ref update_index has been called at least once, otherweise false
