@@ -55,7 +55,6 @@ namespace information_retrieval {
     };
 
     /*! This class provides all data needed for global weighting
-     * @todo This class must be adapted for the further highly distributed and concurrent use
      */
     class global_weight_state_t {
     public:
@@ -72,7 +71,11 @@ namespace information_retrieval {
         void remove_document(const document_id_t &document_id);
 
     private:
-        std::map<count_index_t::key_type, count_t> document_count_per_word_;///@todo idea maybe replace count by set:documents.size
+        /* Interesting profiling question: One could get rid of _per_word_ but would raise complexity of get_document_count_with from
+        O(log(n)) to O(n * m), where n = number of words, and m = number of documents, but memory footprint vs time,
+         and removing would be really heavy
+         */
+        std::map<count_index_t::key_type, count_t> document_count_per_word_;
         std::map<document_id_t, std::set<count_index_t::key_type>> words_per_document_;
 
     };

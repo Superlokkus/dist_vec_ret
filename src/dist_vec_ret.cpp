@@ -140,7 +140,9 @@ namespace information_retrieval {
 
     void global_weight_state_t::update_document(const global_weight_state_t::document_id_t &document_id,
                                                 const count_index_t &count_index) {
-        ///@todo this method should be improved by might better class design
+        if (this->words_per_document_.count(document_id) != 0) {
+            this->remove_document(document_id);
+        }
         std::transform(count_index.cbegin(), count_index.cend(),
                        std::inserter(words_per_document_[document_id], words_per_document_[document_id].end()),
                        [](const count_index_t::value_type &word_count_par) {
@@ -154,7 +156,10 @@ namespace information_retrieval {
     }
 
     void global_weight_state_t::remove_document(const global_weight_state_t::document_id_t &document_id) {
-
+        for (const auto &word : this->words_per_document_.at(document_id)) {
+            this->document_count_per_word_.at(word) -= 1;
+        }
+        this->words_per_document_.erase(document_id);
     }
 
 }
