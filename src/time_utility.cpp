@@ -42,8 +42,10 @@ namespace information_retrieval {
     void time_utility::checkpoint(std::string &&step_name) {
         if (!started_)
             this->reset();
-        const std::chrono::high_resolution_clock::duration step_duration =
-                std::chrono::high_resolution_clock::now() - start_tp_;
+        const auto now = clock::now();
+        const clock::duration step_duration =
+                now - last_step_tp_;
+        last_step_tp_ = std::move(now);
         this->event_times_.emplace_back(std::move(step_name), std::move(step_duration));
     }
 
