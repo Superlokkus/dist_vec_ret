@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
             }
         }
         indexing_timer.stop();
+        std::cout << indexing_timer;
 
         std::cout << "\n Finished indexing, please state your query to match: " << std::endl;
         std::string query;
@@ -48,11 +49,12 @@ int main(int argc, char *argv[]) {
                       [](const decltype(results)::value_type &l, const decltype(results)::value_type &r)
                               -> bool { return std::get<0>(l) < std::get<0>(r); });
             query_timer.checkpoint("Sorting");
+            query_timer.stop();
             std::cout << "Reults by ascending match order: \n";
             for (const auto &doc : results) {
                 std::cout << std::get<1>(doc).common_name << ": " << std::get<0>(doc) << "\n";
             }
-            query_timer.stop();
+            std::cout << query_timer;
             std::cout << "\nQuery: " << std::endl;
         }
     }
