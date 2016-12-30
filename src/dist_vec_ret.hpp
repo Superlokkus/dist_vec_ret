@@ -63,12 +63,25 @@ namespace information_retrieval {
 
         explicit global_weight_state_t() = default;
 
+        virtual ~global_weight_state_t() = default;
+
         count_t get_total_document_count() const;
         count_t get_document_count_with(const string_t &word) const;
         count_t get_document_count_with(const std::set<string_t> &word) const;
 
         void update_document(const document_id_t &document_id, const count_index_t &count_index);
         void remove_document(const document_id_t &document_id);
+
+    protected:
+        virtual count_t remote_get_total_document_count() const;
+
+        virtual count_t remote_get_document_count_with(const string_t &word) const;
+
+        virtual count_t remote_get_document_count_with(const std::set<string_t> &word) const;
+
+        virtual void remote_update_document(const document_id_t &document_id, const count_index_t &count_index);
+
+        virtual void remote_remove_document(const document_id_t &document_id);
 
     private:
         /* Interesting profiling question: One could get rid of _per_word_ but would raise complexity of get_document_count_with from
@@ -78,6 +91,15 @@ namespace information_retrieval {
         std::map<count_index_t::key_type, count_t> document_count_per_word_;
         std::map<document_id_t, std::set<count_index_t::key_type>> words_per_document_;
 
+        count_t local_get_total_document_count() const;
+
+        count_t local_get_document_count_with(const string_t &word) const;
+
+        count_t local_get_document_count_with(const std::set<string_t> &word) const;
+
+        void local_update_document(const document_id_t &document_id, const count_index_t &count_index);
+
+        void local_remove_document(const document_id_t &document_id);
     };
 
     /*! This class takes all data for weighting a given word vector. The heavy lifting aka weighting is then done in
