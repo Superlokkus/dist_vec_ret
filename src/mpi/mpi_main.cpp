@@ -22,8 +22,12 @@
 }
 
 int main(int argc, char *argv[]) {
-    if (MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, NULL) != MPI_SUCCESS)
+    int provided = 0;
+    if (MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided)
+        != MPI_SUCCESS || provided != MPI_THREAD_SERIALIZED) {
+        std::cerr << "MPI_Init_thread failed" << std::endl;
         return EXIT_FAILURE;
+    }
 
     std::set_terminate(&terminate_with_mpi_abort);
 
