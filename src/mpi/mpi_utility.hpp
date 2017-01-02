@@ -6,6 +6,7 @@
 #define DIST_VEC_RET_MPI_UTILITY_HPP
 
 #include <mpi.h>
+#include "mpi_global_weight_state.hpp"
 
 void organize_serving_nodes(const int count_processes);
 
