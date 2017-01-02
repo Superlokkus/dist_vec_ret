@@ -119,16 +119,16 @@ namespace information_retrieval {
     }
 
 
-    global_weight_state_t::count_t global_weight_state_t::get_total_document_count() const {
+    global_weight_state_t::count_t global_weight_state_t::local_get_total_document_count() const {
         return this->words_per_document_.size();
     }
 
-    global_weight_state_t::count_t global_weight_state_t::get_document_count_with(const string_t &word) const {
+    global_weight_state_t::count_t global_weight_state_t::local_get_document_count_with(const string_t &word) const {
         return (document_count_per_word_.count(word) != 0) ? this->document_count_per_word_.at(word) : 0;
     }
 
     global_weight_state_t::count_t
-    global_weight_state_t::get_document_count_with(const std::set<string_t> &word) const {
+    global_weight_state_t::local_get_document_count_with(const std::set<string_t> &word) const {
         count_t count = 0;
         for (const auto &w : word) {
             const auto document_count_for_this_word = this->document_count_per_word_.find(w);
@@ -138,8 +138,8 @@ namespace information_retrieval {
         return count;
     }
 
-    void global_weight_state_t::update_document(const global_weight_state_t::document_id_t &document_id,
-                                                const count_index_t &count_index) {
+    void global_weight_state_t::local_update_document(const global_weight_state_t::document_id_t &document_id,
+                                                      const count_index_t &count_index) {
         if (this->words_per_document_.count(document_id) != 0) {
             this->remove_document(document_id);
         }
@@ -155,11 +155,55 @@ namespace information_retrieval {
 
     }
 
-    void global_weight_state_t::remove_document(const global_weight_state_t::document_id_t &document_id) {
+    void global_weight_state_t::local_remove_document(const global_weight_state_t::document_id_t &document_id) {
         for (const auto &word : this->words_per_document_.at(document_id)) {
             this->document_count_per_word_.at(word) -= 1;
         }
         this->words_per_document_.erase(document_id);
+    }
+
+    global_weight_state_t::count_t global_weight_state_t::get_total_document_count() const {
+        return local_get_total_document_count() + remote_get_total_document_count();
+    }
+
+    global_weight_state_t::count_t global_weight_state_t::get_document_count_with(const string_t &word) const {
+        return local_get_document_count_with(word) + remote_get_document_count_with(word);
+    }
+
+    global_weight_state_t::count_t
+    global_weight_state_t::get_document_count_with(const std::set<string_t> &word) const {
+        return local_get_document_count_with(word) + remote_get_document_count_with(word);
+    }
+
+    void global_weight_state_t::update_document(const global_weight_state_t::document_id_t &document_id,
+                                                const count_index_t &count_index) {
+        this->remote_update_document(document_id, count_index);
+        this->local_update_document(document_id, count_index);
+    }
+
+    void global_weight_state_t::remove_document(const global_weight_state_t::document_id_t &document_id) {
+        this->remote_remove_document(document_id);
+        this->local_remove_document(document_id);
+    }
+
+    global_weight_state_t::count_t global_weight_state_t::remote_get_total_document_count() const {
+        return 0;
+    }
+
+    global_weight_state_t::count_t global_weight_state_t::remote_get_document_count_with(const string_t &word) const {
+        return 0;
+    }
+
+    global_weight_state_t::count_t
+    global_weight_state_t::remote_get_document_count_with(const std::set<string_t> &word) const {
+        return 0;
+    }
+
+    void global_weight_state_t::remote_update_document(const global_weight_state_t::document_id_t &document_id,
+                                                       const count_index_t &count_index) {
+    }
+
+    void global_weight_state_t::remote_remove_document(const global_weight_state_t::document_id_t &document_id) {
     }
 
 }

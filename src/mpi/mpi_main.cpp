@@ -1,62 +1,59 @@
-/*
-  "Hello World" MPI Test Program
-*/
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
+/*! @file mpi_main.cpp
+ *
+ */
+
 #include <mpi.h>
+#include <iostream>
+#include <exception>
+#include <cstdlib>
 
-int main(int argc, char **argv)
-{
-    char buf[256];
-    int my_rank, num_procs;
+#include "mpi_exception.hpp"
+#include "mpi_utility.hpp"
 
-    /* Initialize the infrastructure necessary for communication */
-    MPI_Init(&argc, &argv);
 
-    /* Identify this process */
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+[[noreturn]] static void terminate_with_mpi_abort() {
+    MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+    //Non-reachable but some got some mistrust towards MPI
+    std::abort();
+}
 
-    /* Find out how many total processes are active */
-    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+[[noreturn]] static void mpi_thow_error_handler(MPI_Comm *, int *, ...) {
+    terminate_with_mpi_abort();
+}
 
-    /* Until this point, all programs have been doing exactly the same.
-       Here, we check the rank to distinguish the roles of the programs */
-    if (my_rank == 0) {
-        int other_rank;
-        printf("We have %i processes.\n", num_procs);
+int main(int argc, char *argv[]) {
+    if (MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, NULL) != MPI_SUCCESS)
+        return EXIT_FAILURE;
 
-        /* Send messages to all other processes */
-        for (other_rank = 1; other_rank < num_procs; other_rank++)
-        {
-            sprintf(buf, "Hello %i!", other_rank);
-            MPI_Send(buf, sizeof(buf), MPI_CHAR, other_rank,
-                     0, MPI_COMM_WORLD);
+    std::set_terminate(&terminate_with_mpi_abort);
+
+    MPI_Errhandler handler = {0};
+    MPI_CALL_AND_CHECK(MPI_Comm_create_errhandler(&mpi_thow_error_handler, &handler));
+    MPI_CALL_AND_CHECK(MPI_Comm_set_errhandler(MPI_COMM_WORLD, handler));
+
+    try {
+        int my_rank = 0, process_count = 0;
+        MPI_CALL_AND_CHECK(MPI_Comm_rank(MPI_COMM_WORLD, &my_rank));
+        MPI_CALL_AND_CHECK(MPI_Comm_size(MPI_COMM_WORLD, &process_count));
+        if (my_rank == 0) {
+            organize_serving_nodes(process_count);
+            mpi_query_cli_node_main();
+        } else {
+            mpi_serving_node_main();
         }
 
-        /* Receive messages from all other process */
-        for (other_rank = 1; other_rank < num_procs; other_rank++)
-        {
-            MPI_Recv(buf, sizeof(buf), MPI_CHAR, other_rank,
-                     0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            printf("%s\n", buf);
-        }
-
-    } else {
-
-        /* Receive message from process #0 */
-        MPI_Recv(buf, sizeof(buf), MPI_CHAR, 0,
-                 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        assert(memcmp(buf, "Hello ", 6) == 0),
-
-        /* Send message to process #0 */
-        sprintf(buf, "Process %i reporting for duty.", my_rank);
-        MPI_Send(buf, sizeof(buf), MPI_CHAR, 0,
-                 0, MPI_COMM_WORLD);
-
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        throw;
     }
 
-    /* Tear down the communication infrastructure */
-    MPI_Finalize();
+    MPI_CALL_AND_CHECK(MPI_Finalize());
+
     return 0;
 }
+
+/*MPI_THREAD_SINGLE Only one thread will execute.
+MPI_THREAD_FUNNELED The process may be multi-threaded, but the application must ensure that only the main thread makes MPI calls (for the definition of main thread, see MPI_IS_THREAD_MAIN on page 490).
+MPI_THREAD_SERIALIZED The process may be multi-threaded, and multiple threads may make MPI calls, but only one at a time: MPI calls are not made concurrently from two distinct threads (all MPI calls are “serialized”).
+MPI_THREAD_MULTIPLE Multiple threads may call MPI, with no restrictions.
+ */

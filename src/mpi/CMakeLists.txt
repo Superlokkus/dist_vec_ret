@@ -2,7 +2,7 @@ find_package(MPI REQUIRED)
 
 include_directories(${MPI_INCLUDE_PATH})
 
-add_executable(mpi_main mpi_main.cpp)
+add_executable(mpi_main mpi_main.cpp mpi_utility.cpp mpi_utility.hpp mpi_exception.hpp)
 
 set_property(TARGET mpi_main PROPERTY LINKER_LANGUAGE CXX)
 set_property(TARGET mpi_main PROPERTY CXX_STANDARD 14)
