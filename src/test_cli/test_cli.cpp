@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
         auto manager = information_retrieval::dist_vec_ret_manager{global_state};
 
         auto indexing_timer = information_retrieval::time_utility{"Indexing"};
-        for (const auto &entry : fileapi::directory_iterator(path_to_index)) {
+        for (const auto &entry : fileapi::recursive_directory_iterator(path_to_index)) {
             if (fileapi::is_regular_file(entry)) {
                 manager.add_document(entry.path(), entry.path());
                 indexing_timer.checkpoint(entry.path().filename().string());

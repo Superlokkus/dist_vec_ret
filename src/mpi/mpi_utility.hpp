@@ -8,7 +8,7 @@
 #include <mpi.h>
 #include "mpi_global_weight_state.hpp"
 
-void organize_serving_nodes(const int count_processes);
+void organize_serving_nodes(const int count_processes, const char *path);
 
 void mpi_query_cli_node_main();
 

@@ -28,6 +28,10 @@ int main(int argc, char *argv[]) {
         std::cerr << "MPI_Init_thread failed" << std::endl;
         return EXIT_FAILURE;
     }
+    if (argc != 2) {
+        std::cerr << "Usage " << argv[0] << " <path_to_files>" << std::endl;
+        terminate_with_mpi_abort();
+    }
 
     std::set_terminate(&terminate_with_mpi_abort);
 
@@ -40,7 +44,7 @@ int main(int argc, char *argv[]) {
         MPI_CALL_AND_CHECK(MPI_Comm_rank(MPI_COMM_WORLD, &my_rank));
         MPI_CALL_AND_CHECK(MPI_Comm_size(MPI_COMM_WORLD, &process_count));
         if (my_rank == 0) {
-            organize_serving_nodes(process_count);
+            organize_serving_nodes(process_count, argv[1]);
             mpi_query_cli_node_main();
         } else {
             mpi_serving_node_main();
