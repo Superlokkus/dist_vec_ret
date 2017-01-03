@@ -6,7 +6,7 @@
 #define DIST_VEC_RET_MPI_EXCEPTION_HPP
 
 #include <mpi.h>
-#include <exception>
+#include <stdexcept>
 
 struct mpi_exception : std::runtime_error {
     explicit mpi_exception(const std::string &what, int mpi_error)
