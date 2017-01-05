@@ -25,6 +25,8 @@ void organize_serving_nodes(const int count_processes, const char *path) {
             continue;
         }
         ++file_count;
+        mpi::mpi_async_send<char, std::string>(entry.path().string()).send(file_count % count_processes + 1, 0);
+
     }
 }
 
@@ -35,5 +37,5 @@ void mpi_query_cli_node_main() {
 }
 
 void mpi_serving_node_main() {
-    std::cout << "Serving" << std::endl;
+    std::cout << std::string{mpi::mpi_async_recv<char>(0, 0).get().data()} << std::endl;
 }
