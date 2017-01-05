@@ -8,7 +8,7 @@
 #include <dist_vec_ret.hpp>
 
 namespace information_retrieval {
-    class mpi_global_weight_state_t : public information_retrieval::global_weight_state_t {
+    class mpi_global_weight_state_t : public global_weight_state_t {
         virtual count_t remote_get_total_document_count() const override;
 
         virtual count_t remote_get_document_count_with(const string_t &word) const override;

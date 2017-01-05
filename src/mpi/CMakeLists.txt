@@ -10,7 +10,7 @@ set(mpi_main_sources
         mpi_exception.hpp
         mpi_global_weight_state.cpp
         mpi_global_weight_state.hpp
-        )
+        mpi_async.hpp)
 
 add_executable(mpi_main ${mpi_main_sources})
 

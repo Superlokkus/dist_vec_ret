@@ -7,8 +7,9 @@
 #include <iostream>
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED
-
 #include <boost/filesystem.hpp>
+
+#include "mpi_async.hpp"
 
 
 void organize_serving_nodes(const int count_processes, const char *path) {
@@ -25,7 +26,6 @@ void organize_serving_nodes(const int count_processes, const char *path) {
         }
         ++file_count;
     }
-    std::cout << "File count " << file_count << std::endl;
 }
 
 void mpi_query_cli_node_main() {
