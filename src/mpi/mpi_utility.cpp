@@ -37,5 +37,7 @@ void mpi_query_cli_node_main() {
 }
 
 void mpi_serving_node_main() {
-    std::cout << std::string{mpi::mpi_async_recv<char>(0, 0).get().data()} << std::endl;
+    auto data = mpi::mpi_async_recv<char>(0, 0).get();
+    data.push_back('\0');
+    std::cout << std::string{data.data()} << std::endl;
 }

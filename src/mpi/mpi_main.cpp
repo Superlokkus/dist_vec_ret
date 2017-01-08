@@ -17,8 +17,13 @@
     std::abort();
 }
 
-[[noreturn]] static void mpi_thow_error_handler(MPI_Comm *, int *, ...) {
+[[noreturn]] static void terminate_with_mpi_abort(const mpi_exception &e) {
+    std::cerr << "MPI Error: " << e.what() << " Code: " << e.mpi_error_code() << std::endl;
     terminate_with_mpi_abort();
+}
+
+[[noreturn]] static void mpi_thow_error_handler(MPI_Comm *, int *code, ...) {
+    terminate_with_mpi_abort(mpi_exception::init_with_error_code(*code));
 }
 
 int main(int argc, char *argv[]) {
