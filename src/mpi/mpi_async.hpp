@@ -32,9 +32,17 @@ namespace mpi {
         const static MPI_Datatype value = MPI_LONG_DOUBLE;
     };
 
+    struct mpi_async_request {
+        virtual bool test() noexcept = 0;
+
+        virtual void wait() noexcept = 0;
+
+        virtual ~mpi_async_request() = default;
+    };
+
 
     template<typename T, typename Container = std::vector<T>>
-    class mpi_async_send {
+    class mpi_async_send : public mpi_async_request {
     public:
         mpi_async_send(const Container &to_send) : data_(to_send) {
         }
@@ -63,14 +71,14 @@ namespace mpi {
             send_(dest, tag, com);
         }
 
-        bool test() noexcept {
+        bool test() noexcept override {
             int flag = 0;
             MPI_Status status = {};
             MPI_CALL_AND_CHECK(MPI_Test(&request_, &flag, &status));
             return flag;
         }
 
-        void wait() noexcept {
+        void wait() noexcept override {
             MPI_Status status = {};
             MPI_CALL_AND_CHECK(MPI_Wait(&request_, &status));
         }
@@ -93,7 +101,7 @@ namespace mpi {
 
 
     template<typename T>
-    class mpi_async_recv {
+    class mpi_async_recv : public mpi_async_request {
     public:
         mpi_async_recv(int source, int tag, MPI_Comm com = MPI_COMM_WORLD) {
             int flag = 0;
@@ -124,14 +132,14 @@ namespace mpi {
             r.request_ = MPI_REQUEST_NULL;
         }
 
-        bool test() noexcept {
+        bool test() noexcept override {
             int flag = 0;
             MPI_Status status = {};
             MPI_CALL_AND_CHECK(MPI_Test(&request_, &flag, &status));
             return flag;
         }
 
-        void wait() noexcept {
+        void wait() noexcept override {
             MPI_Status status = {};
             MPI_CALL_AND_CHECK(MPI_Wait(&request_, &status));
         }
