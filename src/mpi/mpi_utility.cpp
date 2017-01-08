@@ -25,7 +25,7 @@ void organize_serving_nodes(const int count_processes, const char *path) {
             continue;
         }
         ++file_count;
-        mpi::mpi_async_send<char, std::string>(entry.path().string()).send(file_count % count_processes + 1, 0);
+        mpi::mpi_async_send<char, std::string>(entry.path().string()).send(file_count % (count_processes - 1) + 1, 0);
 
     }
 }

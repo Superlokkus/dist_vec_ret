@@ -47,7 +47,9 @@ namespace mpi {
         mpi_async_send &operator=(const mpi_async_send &) = delete;
 
         mpi_async_send &operator=(mpi_async_send &&r) noexcept {
-            MPI_CALL_AND_CHECK(MPI_Request_free(&request_));
+            if (request_ != MPI_REQUEST_NULL) {
+                MPI_CALL_AND_CHECK(MPI_Request_free(&request_));
+            }
             data_ = std::move(r.data_);
             request_ = std::move(r.request_);
             r.request_ = MPI_REQUEST_NULL;
@@ -76,7 +78,9 @@ namespace mpi {
         }
 
         ~mpi_async_send() {
-            MPI_CALL_AND_CHECK(MPI_Request_free(&request_));
+            if (request_ != MPI_REQUEST_NULL) {
+                MPI_CALL_AND_CHECK(MPI_Request_free(&request_));
+            }
         }
 
 
@@ -113,7 +117,9 @@ namespace mpi {
         mpi_async_recv &operator=(const mpi_async_recv &) = delete;
 
         mpi_async_recv &operator=(mpi_async_recv &&r) noexcept {
-            MPI_CALL_AND_CHECK(MPI_Request_free(&request_));
+            if (request_ != MPI_REQUEST_NULL) {
+                MPI_CALL_AND_CHECK(MPI_Request_free(&request_));
+            }
             data_ = std::move(r.data_);
             request_ = std::move(r.request_);
             r.request_ = MPI_REQUEST_NULL;
@@ -146,7 +152,9 @@ namespace mpi {
         }
 
         ~mpi_async_recv() {
-            MPI_CALL_AND_CHECK(MPI_Request_free(&request_));
+            if (request_ != MPI_REQUEST_NULL) {
+                MPI_CALL_AND_CHECK(MPI_Request_free(&request_));
+            }
         }
 
 
