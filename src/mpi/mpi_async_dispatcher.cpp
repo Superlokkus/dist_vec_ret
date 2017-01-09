@@ -5,7 +5,7 @@
 #include "mpi_async_dispatcher.hpp"
 
 #include <atomic>
-#include <thread>
+#include <future>
 #include <vector>
 #include <deque>
 #include <mutex>
@@ -17,7 +17,7 @@
 struct mpi::mpi_async_dispatcher::impl {
     using state_t = std::pair<mpi::mpi_async_dispatcher::request_t, mpi::mpi_async_dispatcher::callback_t>;
     std::atomic<bool> run_{false};
-    std::thread dispatch_thread_;
+    std::future<void> dispatch_future_;
 
     void dispatch_loop();
 
@@ -29,7 +29,7 @@ struct mpi::mpi_async_dispatcher::impl {
 };
 
 void mpi::mpi_async_dispatcher::impl::dispatch_loop() {
-    while (this->run_) {
+    while (this->run_ || !dispatch_requests_.empty()) {
         for (auto current = dispatch_requests_.begin(); current != dispatch_requests_.end();) {
             if (!current->first->test()) {
                 ++current;
@@ -85,14 +85,14 @@ void mpi::mpi_async_dispatcher::add_request(mpi::mpi_async_dispatcher::request_t
 void mpi::mpi_async_dispatcher::start() {
     if (!running()) {
         this->impl_->run_ = true;
-        this->impl_->dispatch_thread_ = std::thread{&impl::dispatch_loop, impl_.get()};
+        this->impl_->dispatch_future_ = std::async(std::launch::async, &impl::dispatch_loop, impl_.get());
     }
 }
 
 void mpi::mpi_async_dispatcher::stop() noexcept {
     if (this->running()) {
         this->impl_->run_ = false;
-        this->impl_->dispatch_thread_.join();
+        this->impl_->dispatch_future_.get();
     }
 }
 
