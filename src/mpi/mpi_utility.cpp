@@ -77,4 +77,5 @@ void mpi_serving_node_main() {
     std::function<void()> callback = std::bind(&recv_callback, std::ref(index_com_dispatcher), request.get());
     index_com_dispatcher.add_request(std::move(request), std::move(callback));
     index_com_dispatcher.stop();
+    std::cout << "Recv Dispatcher stopped" << std::endl;
 }
