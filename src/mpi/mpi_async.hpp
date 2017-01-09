@@ -8,6 +8,7 @@
 #include <mpi.h>
 #include <vector>
 #include "mpi_exception.hpp"
+#include <iostream>
 
 namespace mpi {
 
@@ -72,9 +73,11 @@ namespace mpi {
         }
 
         bool test() noexcept override {
+            std::cout << "In send::test" << std::endl;
             int flag = 0;
             MPI_Status status = {};
             MPI_CALL_AND_CHECK(MPI_Test(&request_, &flag, &status));
+            std::cout << "Out of send::test" << std::endl;
             return flag;
         }
 

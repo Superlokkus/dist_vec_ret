@@ -26,7 +26,7 @@ void organize_serving_nodes(const int count_processes, const char *path) {
         throw std::runtime_error(std::string{"Path "} + path + " doesn't exist");
     }
     fileapi::path path_to_index{path};
-    mpi::mpi_async_dispatcher index_com_dispatcher{};
+    mpi::mpi_async_dispatcher index_com_dispatcher{false};
     std::cout << "Dispatcher created" << std::endl;
     auto indexing_timer = information_retrieval::time_utility{"Indexing"};
     size_t file_count = 0;
@@ -38,11 +38,18 @@ void organize_serving_nodes(const int count_processes, const char *path) {
         auto request = std::unique_ptr<mpi::mpi_async_send<char, std::string>>
                 {new mpi::mpi_async_send<char, std::string>
                          (entry.path().string())};
+        std::cout << "Sending" << std::endl;
         request->send(file_count % (count_processes - 1) + 1, static_cast<int>(com_tags::indexing));
         index_com_dispatcher.add_request(std::move(request), std::function<void()>{});
+        std::cout << "Sent" << std::endl;
     }
+    std::cout << "Sending finished" << std::endl;
     indexing_timer.checkpoint("Sending indexing commands");
+    index_com_dispatcher.start();
+    std::cout << "Started dispatcher" << std::endl;
     index_com_dispatcher.stop();
+    indexing_timer.checkpoint("Dispatcher finishing");
+    std::cout << "Stopped dispatcher" << std::endl;
     indexing_timer.checkpoint("Waiting for all nodes to finish indexing");
     indexing_timer.stop();
     std::cout << indexing_timer;
