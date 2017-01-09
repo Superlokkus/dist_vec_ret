@@ -74,14 +74,23 @@ namespace mpi {
 
         bool test() noexcept override {
             std::cout << "In send::test" << std::endl;
+            if (request_ == MPI_REQUEST_NULL || request_ == 0) {
+                return true;
+            }
             int flag = 0;
             MPI_Status status = {};
             MPI_CALL_AND_CHECK(MPI_Test(&request_, &flag, &status));
             std::cout << "Out of send::test" << std::endl;
+            if (flag) {
+                request_ = MPI_REQUEST_NULL;
+            }
             return flag;
         }
 
         void wait() noexcept override {
+            if (request_ == MPI_REQUEST_NULL || request_ == 0) {
+                return;
+            }
             MPI_Status status = {};
             MPI_CALL_AND_CHECK(MPI_Wait(&request_, &status));
         }
@@ -136,13 +145,22 @@ namespace mpi {
         }
 
         bool test() noexcept override {
+            if (request_ == MPI_REQUEST_NULL || request_ == 0) {
+                return true;
+            }
             int flag = 0;
             MPI_Status status = {};
             MPI_CALL_AND_CHECK(MPI_Test(&request_, &flag, &status));
+            if (flag) {
+                request_ = MPI_REQUEST_NULL;
+            }
             return flag;
         }
 
         void wait() noexcept override {
+            if (request_ == MPI_REQUEST_NULL || request_ == 0) {
+                return;
+            }
             MPI_Status status = {};
             MPI_CALL_AND_CHECK(MPI_Wait(&request_, &status));
         }
