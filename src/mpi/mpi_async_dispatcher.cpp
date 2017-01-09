@@ -33,7 +33,8 @@ void mpi::mpi_async_dispatcher::impl::dispatch_loop() {
     while (this->run_ || !dispatch_requests_.empty()) {
         std::cout << "Dispatch: Lets look for finished asyncs" << std::endl;
         for (auto current = dispatch_requests_.begin(); current != dispatch_requests_.end();) {
-            if (!current->first->test()) {
+            std::cout << "Iterators created" << std::endl;
+            if (!(current->first->test())) {
                 std::cout << "Current !test" << std::endl;
                 ++current;
             } else {

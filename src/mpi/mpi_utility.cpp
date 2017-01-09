@@ -61,10 +61,23 @@ void mpi_query_cli_node_main() {
     std::cin >> query;
 }
 
-void mpi_serving_node_main() {
-    std::cout << "Call recv";
-    auto data = mpi::mpi_async_recv<char>(0, static_cast<int>(com_tags::indexing)).get();
-    std::cout << "Finished recv.get";
+static void recv_callback(mpi::mpi_async_dispatcher &dispatch, mpi::mpi_async_recv<char> *recv) {
+    std::cout << "In recieve callback" << std::endl;
+    auto data = recv->get();
     data.push_back('\0');
     std::cout << std::string{data.data()} << std::endl;
+    auto request = std::unique_ptr<mpi::mpi_async_recv<char>>
+            {new mpi::mpi_async_recv<char>(0, static_cast<int>(com_tags::indexing))};
+    std::function<void()> callback = std::bind(&recv_callback, std::ref(dispatch), request.get());
+    dispatch.add_request(std::move(request), std::move(callback));
+}
+
+void mpi_serving_node_main() {
+    mpi::mpi_async_dispatcher index_com_dispatcher{true};
+    std::cout << "Recv Dispatcher created" << std::endl;
+    auto request = std::unique_ptr<mpi::mpi_async_recv<char>>
+            {new mpi::mpi_async_recv<char>(0, static_cast<int>(com_tags::indexing))};
+    std::function<void()> callback = std::bind(&recv_callback, std::ref(index_com_dispatcher), request.get());
+    index_com_dispatcher.add_request(std::move(request), std::move(callback));
+    index_com_dispatcher.stop();
 }
