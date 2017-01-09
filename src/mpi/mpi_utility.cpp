@@ -66,10 +66,7 @@ static void recv_callback(mpi::mpi_async_dispatcher &dispatch, mpi::mpi_async_re
     auto data = recv->get();
     data.push_back('\0');
     std::cout << std::string{data.data()} << std::endl;
-    auto request = std::unique_ptr<mpi::mpi_async_recv<char>>
-            {new mpi::mpi_async_recv<char>(0, static_cast<int>(com_tags::indexing))};
-    std::function<void()> callback = std::bind(&recv_callback, std::ref(dispatch), request.get());
-    dispatch.add_request(std::move(request), std::move(callback));
+    std::cout << "Out of recieve callback" << std::endl;
 }
 
 void mpi_serving_node_main() {
