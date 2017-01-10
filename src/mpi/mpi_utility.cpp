@@ -19,29 +19,29 @@ void organize_serving_nodes(const int count_processes, const char *path) {
         throw std::runtime_error(std::string{"Path "} + path + " doesn't exist");
     }
 
-    std::vector<char> file_paths;
-    std::vector<int> displacements;
+    std::vector<std::string> file_paths;
     for (const auto &entry : fileapi::recursive_directory_iterator(path)) {
         if (!fileapi::is_regular_file(entry)) {
             continue;
         }
-        const auto string = entry.path().generic_string();
-        const auto to_copy = string.size() + 1;
-        file_paths.insert(file_paths.end(), to_copy, '\0');
-        memcpy(file_paths.data() + file_paths.size() - to_copy, string.data(), to_copy);
-        displacements.push_back(to_copy);
+        file_paths.push_back(entry.path().generic_string());
     }
 
     //To lazy to use div for this one thing
-    const int per_node = file_paths.size() / (count_processes - 1);
-    const int remainder = file_paths.size() % (count_processes - 1);
-    std::vector<int> count_to_rank(count_processes, 0);
+    const unsigned long long per_node = file_paths.size() / (count_processes - 1);
+    const unsigned long long remainder = file_paths.size() % (count_processes - 1);
+    std::vector<unsigned long long> count_to_rank(count_processes, 0);
     std::fill(count_to_rank.begin() + 1, count_to_rank.end(), per_node);
     std::fill_n(count_to_rank.begin() + 1, remainder, per_node + 1);
 
-    int my_count = 0;
-    MPI_CALL_AND_CHECK(MPI_Scatter(count_to_rank.data(), 1, MPI_INT, &my_count, 1, MPI_INT, 0, MPI_COMM_WORLD));
+    unsigned long long my_count = 0;
+    MPI_CALL_AND_CHECK(MPI_Scatter(count_to_rank.data(), 1, MPI_UNSIGNED_LONG_LONG, &my_count,
+                                   1, MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD));
 
+    for (unsigned long long i = 0; i < file_paths.size(); ++i) {
+        MPI_CALL_AND_CHECK(MPI_Send(file_paths[i].c_str(), file_paths[i].size() + 1,
+                                    MPI_CHAR, (i % (count_processes - 1)) + 1, 0, MPI_COMM_WORLD));
+    }
 }
 
 void mpi_query_cli_node_main() {
@@ -51,8 +51,19 @@ void mpi_query_cli_node_main() {
 }
 
 void mpi_serving_node_main() {
-    int my_count = 0;
-    MPI_CALL_AND_CHECK(MPI_Scatter(NULL, 0, MPI_INT, &my_count, 1, MPI_INT, 0, MPI_COMM_WORLD));
-    std::cout << "I got " << my_count << " to count" << std::endl;
-
+    unsigned long long my_count = 0;
+    MPI_CALL_AND_CHECK(
+            MPI_Scatter(NULL, 0, MPI_UNSIGNED_LONG_LONG, &my_count, 1, MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD));
+    std::cout << "I got " << my_count << " files to index" << std::endl;
+    std::vector<std::string> file_paths;
+    for (unsigned long long i = 0; i < my_count; ++i) {
+        MPI_Status status = {};
+        MPI_CALL_AND_CHECK(MPI_Probe(0, 0, MPI_COMM_WORLD, &status));
+        int count = 0;
+        MPI_Get_count(&status, MPI_CHAR, &count);
+        std::vector<char> cstring(count);
+        MPI_CALL_AND_CHECK(MPI_Recv(cstring.data(), count, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status));
+        file_paths.emplace_back(cstring.data());
+    }
+    std::cout << "Got all file paths to index" << std::endl;
 }
