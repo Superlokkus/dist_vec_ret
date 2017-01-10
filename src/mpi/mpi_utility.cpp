@@ -9,7 +9,8 @@
 #define BOOST_FILESYSTEM_NO_DEPRECATED
 #include <boost/filesystem.hpp>
 
-#include "mpi_async.hpp"
+#include "mpi_exception.hpp"
+#include <algorithm>
 
 
 void organize_serving_nodes(const int count_processes, const char *path) {
@@ -17,17 +18,30 @@ void organize_serving_nodes(const int count_processes, const char *path) {
     if (!fileapi::exists(path)) {
         throw std::runtime_error(std::string{"Path "} + path + " doesn't exist");
     }
-    fileapi::path path_to_index{path};
 
-    size_t file_count = 0;
-    for (const auto &entry : fileapi::recursive_directory_iterator(path_to_index)) {
+    std::vector<char> file_paths;
+    std::vector<int> displacements;
+    for (const auto &entry : fileapi::recursive_directory_iterator(path)) {
         if (!fileapi::is_regular_file(entry)) {
             continue;
         }
-        ++file_count;
-        mpi::mpi_async_send<char, std::string>(entry.path().string()).send(file_count % (count_processes - 1) + 1, 0);
-
+        const auto string = entry.path().generic_string();
+        const auto to_copy = string.size() + 1;
+        file_paths.insert(file_paths.end(), to_copy, '\0');
+        memcpy(file_paths.data() + file_paths.size() - to_copy, string.data(), to_copy);
+        displacements.push_back(to_copy);
     }
+
+    //To lazy to use div for this one thing
+    const int per_node = file_paths.size() / (count_processes - 1);
+    const int remainder = file_paths.size() % (count_processes - 1);
+    std::vector<int> count_to_rank(count_processes, 0);
+    std::fill(count_to_rank.begin() + 1, count_to_rank.end(), per_node);
+    std::fill_n(count_to_rank.begin() + 1, remainder, per_node + 1);
+
+    int my_count = 0;
+    MPI_CALL_AND_CHECK(MPI_Scatter(count_to_rank.data(), 1, MPI_INT, &my_count, 1, MPI_INT, 0, MPI_COMM_WORLD));
+
 }
 
 void mpi_query_cli_node_main() {
@@ -37,7 +51,8 @@ void mpi_query_cli_node_main() {
 }
 
 void mpi_serving_node_main() {
-    auto data = mpi::mpi_async_recv<char>(0, 0).get();
-    data.push_back('\0');
-    std::cout << std::string{data.data()} << std::endl;
+    int my_count = 0;
+    MPI_CALL_AND_CHECK(MPI_Scatter(NULL, 0, MPI_INT, &my_count, 1, MPI_INT, 0, MPI_COMM_WORLD));
+    std::cout << "I got " << my_count << " to count" << std::endl;
+
 }
