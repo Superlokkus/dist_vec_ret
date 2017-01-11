@@ -65,7 +65,7 @@ void organize_serving_nodes(const int count_processes, const char *path) {
     std::cout << "Looks like everyone is ready" << std::endl;
 }
 
-information_retrieval::dist_vec_ret_manager::result_t get_unsorted_results(std::string query) {
+information_retrieval::dist_vec_ret_manager::result_t get_unsorted_results(std::string& query) {
     boost::mpi::broadcast(boost::mpi::communicator{}, query, 0);
     return {};
 }
