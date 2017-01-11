@@ -1,5 +1,5 @@
 find_package(MPI REQUIRED)
-find_package(Boost COMPONENTS system filesystem REQUIRED)
+find_package(Boost COMPONENTS system filesystem mpi REQUIRED)
 
 include_directories(${MPI_INCLUDE_PATH})
 

@@ -14,6 +14,8 @@
 #include <time_utility.hpp>
 
 #include <dist_vec_ret_manager.hpp>
+#include <boost/mpi.hpp>
+#include <boost/serialization/string.hpp>
 
 
 class mpi_dvr_manager : private information_retrieval::dist_vec_ret_manager {
@@ -63,8 +65,8 @@ void organize_serving_nodes(const int count_processes, const char *path) {
     std::cout << "Looks like everyone is ready" << std::endl;
 }
 
-information_retrieval::dist_vec_ret_manager::result_t get_unsorted_results(const std::string &query) {
-
+information_retrieval::dist_vec_ret_manager::result_t get_unsorted_results(std::string query) {
+    boost::mpi::broadcast(boost::mpi::communicator{}, query, 0);
     return {};
 }
 
