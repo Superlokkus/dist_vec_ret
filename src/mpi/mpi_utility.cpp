@@ -11,6 +11,16 @@
 
 #include "mpi_exception.hpp"
 #include <algorithm>
+#include <time_utility.hpp>
+
+#include <dist_vec_ret_manager.hpp>
+
+
+class mpi_dvr_manager : private information_retrieval::dist_vec_ret_manager {
+public:
+
+};
+
 
 
 void organize_serving_nodes(const int count_processes, const char *path) {
@@ -18,7 +28,8 @@ void organize_serving_nodes(const int count_processes, const char *path) {
     if (!fileapi::exists(path)) {
         throw std::runtime_error(std::string{"Path "} + path + " doesn't exist");
     }
-
+    std::cout << "Scanning directory" << std::endl;
+    auto indexing_timer = information_retrieval::time_utility{"Indexing"};
     std::vector<std::string> file_paths;
     for (const auto &entry : fileapi::recursive_directory_iterator(path)) {
         if (!fileapi::is_regular_file(entry)) {
@@ -26,6 +37,7 @@ void organize_serving_nodes(const int count_processes, const char *path) {
         }
         file_paths.push_back(entry.path().generic_string());
     }
+    indexing_timer.checkpoint("Scanning directory recursively");
 
     //To lazy to use div for this one thing
     const unsigned long long per_node = file_paths.size() / (count_processes - 1);
@@ -33,22 +45,50 @@ void organize_serving_nodes(const int count_processes, const char *path) {
     std::vector<unsigned long long> count_to_rank(count_processes, 0);
     std::fill(count_to_rank.begin() + 1, count_to_rank.end(), per_node);
     std::fill_n(count_to_rank.begin() + 1, remainder, per_node + 1);
-
+    indexing_timer.checkpoint("Calculating distribution of files on nodes");
     unsigned long long my_count = 0;
     MPI_CALL_AND_CHECK(MPI_Scatter(count_to_rank.data(), 1, MPI_UNSIGNED_LONG_LONG, &my_count,
                                    1, MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD));
-
+    indexing_timer.checkpoint("Broadcasting file counter to nodes");
     for (unsigned long long i = 0; i < file_paths.size(); ++i) {
         MPI_CALL_AND_CHECK(MPI_Send(file_paths[i].c_str(), file_paths[i].size() + 1,
                                     MPI_CHAR, (i % (count_processes - 1)) + 1, 0, MPI_COMM_WORLD));
     }
+    indexing_timer.checkpoint("Sending file paths to every node accodingly");
+    std::cout << "Wating for all nodes to finish indexing..." << std::endl;
+    MPI_CALL_AND_CHECK(MPI_Barrier(MPI_COMM_WORLD));
+    indexing_timer.checkpoint("Waiting on all nodes to finish indexing");
+    indexing_timer.stop();
+    std::cout << indexing_timer << "\n";
+    std::cout << "Looks like everyone is ready" << std::endl;
+}
+
+information_retrieval::dist_vec_ret_manager::result_t get_unsorted_results(const std::string &query) {
+
+    return {};
 }
 
 void mpi_query_cli_node_main() {
-    std::cout << "Querying" << std::endl;
-    std::string query;
-    std::cin >> query;
+    std::cout << "Query: " << std::endl;
+    for (std::string query; std::getline(std::cin, query); std::cout << "\nQuery: ") {
+        auto query_timer = information_retrieval::time_utility{"Query"};
+        auto results = get_unsorted_results(query);
+        query_timer.checkpoint("Getting results");
+        const auto sort_crit = [](const decltype(results)::value_type &l, const decltype(results)::value_type &r)
+                -> bool { return std::get<0>(l) < std::get<0>(r); };
+        std::sort(results.begin(), results.end(), sort_crit);
+        query_timer.checkpoint("Sorting results");
+        auto new_end = std::unique(results.begin(), results.end(), sort_crit);
+        query_timer.checkpoint("Remove duplicates");
+        results.erase(new_end, results.end());
+        query_timer.stop();
+        for (const auto &doc : results) {
+            std::cout << std::get<1>(doc).common_name << ": " << std::get<0>(doc) << "\n";
+        }
+        std::cout << query_timer << std::endl;
+    }
 }
+
 
 void mpi_serving_node_main() {
     unsigned long long my_count = 0;
@@ -66,4 +106,8 @@ void mpi_serving_node_main() {
         file_paths.emplace_back(cstring.data());
     }
     std::cout << "Got all file paths to index" << std::endl;
+    //Indexing
+
+    //Signal finshed indexing
+    MPI_CALL_AND_CHECK(MPI_Barrier(MPI_COMM_WORLD));
 }

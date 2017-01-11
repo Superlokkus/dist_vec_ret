@@ -45,6 +45,8 @@ namespace information_retrieval {
             static boost::uuids::uuid get_namespace_uuid();
         };
 
+        using result_t = std::vector<std::tuple<distance_t, document_meta_t>>;
+
         void add_document(document_meta_t meta_data, boost::filesystem::path path_to_file);
 
         bool remove_document(const decltype(document_meta_t::id) &id) noexcept;
@@ -53,7 +55,7 @@ namespace information_retrieval {
          * @param query
          * @return The documents with distance
          */
-        std::vector<std::tuple<distance_t, document_meta_t>> find_match_for(const std::string &query);
+        result_t find_match_for(const std::string &query);
 
 
     private:
