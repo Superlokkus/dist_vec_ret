@@ -85,9 +85,6 @@ void mpi_query_cli_node_main() {
                 -> bool { return std::get<0>(l) < std::get<0>(r); };
         std::sort(results.begin(), results.end(), sort_crit);
         query_timer.checkpoint("Sorting results");
-        auto new_end = std::unique(results.begin(), results.end(), sort_crit);
-        query_timer.checkpoint("Remove duplicates");
-        results.erase(new_end, results.end());
         query_timer.stop();
         for (const auto &doc : results) {
             std::cout << std::get<1>(doc) << ": " << std::get<0>(doc) << "\n";
