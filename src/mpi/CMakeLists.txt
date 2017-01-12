@@ -1,5 +1,5 @@
 find_package(MPI REQUIRED)
-find_package(Boost COMPONENTS system filesystem REQUIRED)
+find_package(Boost COMPONENTS system filesystem serialization mpi REQUIRED)
 
 include_directories(${MPI_INCLUDE_PATH})
 
@@ -10,7 +10,7 @@ set(mpi_main_sources
         mpi_exception.hpp
         mpi_global_weight_state.cpp
         mpi_global_weight_state.hpp
-        mpi_async.hpp mpi_async_dispatcher.cpp mpi_async_dispatcher.hpp)
+        mpi_async.hpp)
 
 add_executable(mpi_main ${mpi_main_sources})
 
