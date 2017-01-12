@@ -34,9 +34,11 @@ void information_retrieval::mpi_global_weight_state_t::remote_remove_document(
     global_weight_state_t::remote_remove_document(document_id);
 }
 
-information_retrieval::mpi_global_weight_state_t::mpi_global_weight_state_t() :
+information_retrieval::mpi_global_weight_state_t::mpi_global_weight_state_t(boost::mpi::communicator com) :
         global_weight_state_t{},
-        dispatch_run_{true} {
+        dispatch_run_{true},
+        nodes_com_{std::move(com)} {
+    std::cout << "Com size is " << nodes_com_.size() << std::endl;
     this->dispatcher_ = std::thread{&mpi_global_weight_state_t::internal_concurrent_dispatcher, this};
 }
 

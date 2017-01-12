@@ -110,11 +110,16 @@ std::unique_ptr<information_retrieval::dist_vec_ret_manager> indexing() {
     }
     std::cout << "Got all file paths to index" << std::endl;
 
-    auto global_state = std::make_shared<information_retrieval::mpi_global_weight_state_t>();
+    auto all_group = boost::mpi::communicator{}.group();
+    auto indexing_nodes = boost::mpi::group{all_group, false};
+    indexing_nodes.exclude(0, 1);
+    auto indexing_nodes_com = boost::mpi::communicator{boost::mpi::communicator{}, indexing_nodes};
+
+    auto global_state = std::make_shared<information_retrieval::mpi_global_weight_state_t>(
+            std::move(indexing_nodes_com));
     auto manager =
             std::unique_ptr<information_retrieval::dist_vec_ret_manager>
                     {new information_retrieval::dist_vec_ret_manager(global_state)};
-    std::cout << "Manager made" << std::endl;
     for (const auto &file : file_paths) {
         auto path = boost::filesystem::path{file};
         manager->add_document(path, path);

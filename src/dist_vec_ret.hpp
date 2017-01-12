@@ -83,6 +83,13 @@ namespace information_retrieval {
 
         virtual void remote_remove_document(const document_id_t &document_id);
 
+
+        count_t local_get_total_document_count() const;
+
+        count_t local_get_document_count_with(const string_t &word) const;
+
+        count_t local_get_document_count_with(const std::set<string_t> &word) const;
+
     private:
         /* Interesting profiling question: One could get rid of _per_word_ but would raise complexity of get_document_count_with from
         O(log(n)) to O(n * m), where n = number of words, and m = number of documents, but memory footprint vs time,
@@ -90,12 +97,6 @@ namespace information_retrieval {
          */
         std::map<count_index_t::key_type, count_t> document_count_per_word_;
         std::map<document_id_t, std::set<count_index_t::key_type>> words_per_document_;
-
-        count_t local_get_total_document_count() const;
-
-        count_t local_get_document_count_with(const string_t &word) const;
-
-        count_t local_get_document_count_with(const std::set<string_t> &word) const;
 
         void local_update_document(const document_id_t &document_id, const count_index_t &count_index);
 

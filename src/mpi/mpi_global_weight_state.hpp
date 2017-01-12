@@ -14,14 +14,12 @@
 namespace information_retrieval {
     class mpi_global_weight_state_t : public global_weight_state_t {
     public:
-        explicit mpi_global_weight_state_t();
-
+        explicit mpi_global_weight_state_t(boost::mpi::communicator com);
         ~mpi_global_weight_state_t();
-
     private:
         std::thread dispatcher_;
         std::atomic<bool> dispatch_run_;
-
+        boost::mpi::communicator nodes_com_;
         void internal_concurrent_dispatcher();
 
         static const int mpi_tag = 42 + 1337;
