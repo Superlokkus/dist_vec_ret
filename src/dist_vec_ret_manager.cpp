@@ -37,7 +37,7 @@ auto information_retrieval::dist_vec_ret_manager::find_match_for(const std::stri
     auto weight = weighter.get_weight();
 
     for (const auto &doc : weights_) {
-        results.emplace_back(std::forward_as_tuple(calc_distance(*weight, *doc.second), meta_data_[doc.first]));
+        results.emplace_back(std::make_pair(calc_distance(*weight, *doc.second), meta_data_[doc.first]));
     }
 
     return results;
@@ -53,7 +53,7 @@ auto information_retrieval::dist_vec_ret_manager::find_match_for_simple(const st
 
     for (const auto &doc : weights_) {
         results.emplace_back(
-                std::forward_as_tuple(calc_distance(*weight, *doc.second), meta_data_[doc.first].common_name));
+                std::make_pair(calc_distance(*weight, *doc.second), meta_data_[doc.first].common_name));
     }
 
     return results;
