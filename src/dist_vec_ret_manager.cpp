@@ -28,10 +28,9 @@ void information_retrieval::dist_vec_ret_manager::add_document(
 
 }
 
-std::vector<std::tuple<information_retrieval::distance_t, information_retrieval::dist_vec_ret_manager::document_meta_t>>
-information_retrieval::dist_vec_ret_manager::find_match_for(const std::string &query) {
+auto information_retrieval::dist_vec_ret_manager::find_match_for(const std::string &query) -> result_t {
     using namespace information_retrieval;
-    std::vector<std::tuple<distance_t, dist_vec_ret_manager::document_meta_t>> results;
+    result_t results;
     word_counter count{query};
     count.update_index();
     weighter weighter{global_state_, count.get_index()};

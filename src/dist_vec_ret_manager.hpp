@@ -45,7 +45,7 @@ namespace information_retrieval {
             static boost::uuids::uuid get_namespace_uuid();
         };
 
-        using result_t = std::vector<std::tuple<distance_t, document_meta_t>>;
+        using result_t = std::vector<std::pair<distance_t, document_meta_t>>;
 
         void add_document(document_meta_t meta_data, boost::filesystem::path path_to_file);
 

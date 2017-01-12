@@ -16,6 +16,9 @@
 #include <dist_vec_ret_manager.hpp>
 #include <boost/mpi.hpp>
 #include <boost/serialization/string.hpp>
+#include <boost/serialization/utility.hpp>
+#include "mpi_global_weight_state.hpp"
+
 
 
 class mpi_dvr_manager : private information_retrieval::dist_vec_ret_manager {
@@ -66,8 +69,16 @@ void organize_serving_nodes(const int count_processes, const char *path) {
 }
 
 information_retrieval::dist_vec_ret_manager::result_t get_unsorted_results(std::string& query) {
-    boost::mpi::broadcast(boost::mpi::communicator{}, query, 0);
-    return {};
+    boost::mpi::communicator world{};
+    boost::mpi::broadcast(world, query, 0);
+    std::vector<information_retrieval::dist_vec_ret_manager::result_t> result_vec{};
+    information_retrieval::dist_vec_ret_manager::result_t results{};
+    boost::mpi::gather(world, results, result_vec, 0);
+    for (auto &result_from_node : result_vec) {
+        std::move(result_from_node.begin(), result_from_node.end(), std::back_inserter(results));
+    }
+
+    return results;
 }
 
 void mpi_query_cli_node_main() {
@@ -91,8 +102,7 @@ void mpi_query_cli_node_main() {
     }
 }
 
-
-void mpi_serving_node_main() {
+std::unique_ptr<information_retrieval::dist_vec_ret_manager> indexing() {
     unsigned long long my_count = 0;
     MPI_CALL_AND_CHECK(
             MPI_Scatter(NULL, 0, MPI_UNSIGNED_LONG_LONG, &my_count, 1, MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD));
@@ -108,8 +118,27 @@ void mpi_serving_node_main() {
         file_paths.emplace_back(cstring.data());
     }
     std::cout << "Got all file paths to index" << std::endl;
-    //Indexing
 
+    auto global_state = std::make_shared<information_retrieval::mpi_global_weight_state_t>();
+    auto manager =
+            std::unique_ptr<information_retrieval::dist_vec_ret_manager>
+                    {new information_retrieval::dist_vec_ret_manager(global_state)};
+    for (const auto &file : file_paths) {
+        auto path = boost::filesystem::path{file};
+        manager->add_document(path, path);
+    }
     //Signal finshed indexing
     MPI_CALL_AND_CHECK(MPI_Barrier(MPI_COMM_WORLD));
+    return manager;
+}
+
+void mpi_serving_node_main() {
+    auto manager = indexing();
+    auto world = boost::mpi::communicator{};
+    while (true) {
+        std::string query;
+        boost::mpi::broadcast(world, query, 0);
+        auto my_results = manager->find_match_for(query);
+        boost::mpi::gather(world, my_results, 0);
+    }
 }
