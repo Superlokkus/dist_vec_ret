@@ -22,13 +22,6 @@
 #include "mpi_global_weight_state.hpp"
 
 
-class mpi_dvr_manager : private information_retrieval::dist_vec_ret_manager {
-public:
-
-};
-
-
-
 void organize_serving_nodes(const int count_processes, const char *path) {
     namespace fileapi = boost::filesystem;
     if (!fileapi::exists(path)) {
@@ -69,11 +62,11 @@ void organize_serving_nodes(const int count_processes, const char *path) {
     std::cout << "Looks like everyone is ready" << std::endl;
 }
 
-information_retrieval::dist_vec_ret_manager::result_t get_unsorted_results(std::string& query) {
+information_retrieval::dist_vec_ret_manager::simple_result get_unsorted_results(std::string &query) {
     boost::mpi::communicator world{};
     boost::mpi::broadcast(world, query, 0);
-    std::vector<information_retrieval::dist_vec_ret_manager::result_t> result_vec{};
-    information_retrieval::dist_vec_ret_manager::result_t results{};
+    std::vector<information_retrieval::dist_vec_ret_manager::simple_result> result_vec{};
+    information_retrieval::dist_vec_ret_manager::simple_result results{};
     boost::mpi::gather(world, results, result_vec, 0);
     for (auto &result_from_node : result_vec) {
         std::move(result_from_node.begin(), result_from_node.end(), std::back_inserter(results));
@@ -97,7 +90,7 @@ void mpi_query_cli_node_main() {
         results.erase(new_end, results.end());
         query_timer.stop();
         for (const auto &doc : results) {
-            std::cout << std::get<1>(doc).common_name << ": " << std::get<0>(doc) << "\n";
+            std::cout << std::get<1>(doc) << ": " << std::get<0>(doc) << "\n";
         }
         std::cout << query_timer << std::endl;
     }
@@ -139,7 +132,7 @@ void mpi_serving_node_main() {
     while (true) {
         std::string query;
         boost::mpi::broadcast(world, query, 0);
-        auto my_results = manager->find_match_for(query);
+        auto my_results = manager->find_match_for_simple(query);
         boost::mpi::gather(world, my_results, 0);
     }
 }

@@ -43,6 +43,22 @@ auto information_retrieval::dist_vec_ret_manager::find_match_for(const std::stri
     return results;
 }
 
+auto information_retrieval::dist_vec_ret_manager::find_match_for_simple(const std::string &query) -> simple_result {
+    using namespace information_retrieval;
+    simple_result results;
+    word_counter count{query};
+    count.update_index();
+    weighter weighter{global_state_, count.get_index()};
+    auto weight = weighter.get_weight();
+
+    for (const auto &doc : weights_) {
+        results.emplace_back(
+                std::forward_as_tuple(calc_distance(*weight, *doc.second), meta_data_[doc.first].common_name));
+    }
+
+    return results;
+}
+
 information_retrieval::dist_vec_ret_manager::document_meta_t::document_meta_t() {
     this->id = boost::uuids::nil_uuid();
 }

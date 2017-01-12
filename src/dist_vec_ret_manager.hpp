@@ -56,6 +56,7 @@ namespace information_retrieval {
 
 
         using result_t = std::vector<std::pair<distance_t, document_meta_t>>;
+        using simple_result = std::vector<std::pair<distance_t, std::string>>;
 
         void add_document(document_meta_t meta_data, boost::filesystem::path path_to_file);
 
@@ -67,6 +68,7 @@ namespace information_retrieval {
          */
         result_t find_match_for(const std::string &query);
 
+        simple_result find_match_for_simple(const std::string &query);
 
     private:
         std::shared_ptr<global_weight_state_t> global_state_;
