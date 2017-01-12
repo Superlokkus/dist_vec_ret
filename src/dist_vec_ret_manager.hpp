@@ -16,6 +16,9 @@
 #define BOOST_FILESYSTEM_NO_DEPRECATED
 
 #include <boost/filesystem.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_serialize.hpp>
 
 #include "dist_vec_ret.hpp"
 
@@ -41,9 +44,16 @@ namespace information_retrieval {
 
             document_meta_t(boost::filesystem::path path_to_file);
 
+            template<class Archive>
+            void serialize(Archive &ar, const unsigned int version) {
+                ar & id;
+                ar & common_name;
+            }
+
         protected:
             static boost::uuids::uuid get_namespace_uuid();
         };
+
 
         using result_t = std::vector<std::pair<distance_t, document_meta_t>>;
 

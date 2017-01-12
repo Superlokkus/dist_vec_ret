@@ -16,9 +16,10 @@
 #include <dist_vec_ret_manager.hpp>
 #include <boost/mpi.hpp>
 #include <boost/serialization/string.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/serialization.hpp>
 #include <boost/serialization/utility.hpp>
 #include "mpi_global_weight_state.hpp"
-
 
 
 class mpi_dvr_manager : private information_retrieval::dist_vec_ret_manager {
