@@ -114,6 +114,7 @@ std::unique_ptr<information_retrieval::dist_vec_ret_manager> indexing() {
     auto manager =
             std::unique_ptr<information_retrieval::dist_vec_ret_manager>
                     {new information_retrieval::dist_vec_ret_manager(global_state)};
+    std::cout << "Manager made" << std::endl;
     for (const auto &file : file_paths) {
         auto path = boost::filesystem::path{file};
         manager->add_document(path, path);

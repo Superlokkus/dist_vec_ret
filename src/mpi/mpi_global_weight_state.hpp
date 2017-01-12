@@ -6,9 +6,26 @@
 #define DIST_VEC_RET_MPI_GLOBAL_WEIGHT_STATE_HPP
 
 #include <dist_vec_ret.hpp>
+#include <thread>
+#include <atomic>
+
+#include <boost/mpi/communicator.hpp>
 
 namespace information_retrieval {
     class mpi_global_weight_state_t : public global_weight_state_t {
+    public:
+        explicit mpi_global_weight_state_t();
+
+        ~mpi_global_weight_state_t();
+
+    private:
+        std::thread dispatcher_;
+        std::atomic<bool> dispatch_run_;
+
+        void internal_concurrent_dispatcher();
+
+        static const int mpi_tag = 42 + 1337;
+
         virtual count_t remote_get_total_document_count() const override;
 
         virtual count_t remote_get_document_count_with(const string_t &word) const override;

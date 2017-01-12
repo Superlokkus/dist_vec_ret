@@ -4,6 +4,8 @@
 
 #include "mpi_global_weight_state.hpp"
 
+#include <iostream>
+
 information_retrieval::global_weight_state_t::count_t
 information_retrieval::mpi_global_weight_state_t::remote_get_total_document_count() const {
     return global_weight_state_t::remote_get_total_document_count();
@@ -30,4 +32,23 @@ void information_retrieval::mpi_global_weight_state_t::remote_update_document(
 void information_retrieval::mpi_global_weight_state_t::remote_remove_document(
         const information_retrieval::global_weight_state_t::document_id_t &document_id) {
     global_weight_state_t::remote_remove_document(document_id);
+}
+
+information_retrieval::mpi_global_weight_state_t::mpi_global_weight_state_t() :
+        global_weight_state_t{},
+        dispatch_run_{true} {
+    this->dispatcher_ = std::thread{&mpi_global_weight_state_t::internal_concurrent_dispatcher, this};
+}
+
+void information_retrieval::mpi_global_weight_state_t::internal_concurrent_dispatcher() {
+    while (this->dispatch_run_) {
+
+    }
+}
+
+information_retrieval::mpi_global_weight_state_t::~mpi_global_weight_state_t() {
+    this->dispatch_run_ = false;
+    if (this->dispatcher_.joinable()) {
+        dispatcher_.join();
+    }
 }

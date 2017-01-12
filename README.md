@@ -4,7 +4,7 @@ Distributed vector retrieval
 Building
 ----------
 To build this project following libraries are needed
-*   Boost
+*   Boost with MPI support
 *   a MPI implementation
 
 Building is done via cmake.
