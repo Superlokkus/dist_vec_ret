@@ -176,4 +176,14 @@ BOOST_AUTO_TEST_CASE(distance) {
 
 }
 
+BOOST_AUTO_TEST_CASE(is_punct_stemming) {
+    information_retrieval::word_counter index1("This is a tasty Test, query for tEst? purposes");
+    BOOST_WARN_EXCEPTION(index1.get_index(), std::logic_error, [](const std::exception &e) { return true; });
+    index1.update_index();
+    auto index = index1.get_index();
+    BOOST_CHECK_EQUAL(index->at("test"), 2);
+    BOOST_CHECK_EQUAL(index->at("tasty"), 1);
+
+}
+
 

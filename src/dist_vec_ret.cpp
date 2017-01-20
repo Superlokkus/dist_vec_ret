@@ -39,7 +39,16 @@ namespace information_retrieval {
 
 
     void word_counter::stemming(std::string &word) {
-        std::for_each(word.begin(), word.end(), [](char &c) { c = std::tolower(c); });
+        for (auto char_it = word.begin(), end = word.end(); char_it != end; ++char_it) {
+            if (ispunct(*char_it)) {
+                char_it = word.erase(char_it);
+                end = word.end();
+                if (char_it == end) {
+                    break;
+                }
+            }
+            *char_it = std::tolower(*char_it);
+        }
     }
 
     std::shared_ptr<weight_index_t> weighter::get_weight() {
