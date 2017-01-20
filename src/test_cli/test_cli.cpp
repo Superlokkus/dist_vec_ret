@@ -3,6 +3,7 @@
  */
 
 #include <iostream>
+#include <iomanip>
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED
 #include <boost/filesystem.hpp>
@@ -52,7 +53,7 @@ int main(int argc, char *argv[]) {
             query_timer.stop();
             std::cout << "Reults by ascending match order: \n";
             for (const auto &doc : results) {
-                std::cout << std::get<1>(doc).common_name << ": " << std::get<0>(doc) << "\n";
+                std::cout << std::setw(30) << std::get<1>(doc).common_name << ": " << std::get<0>(doc) << "\n";
             }
             std::cout << query_timer;
             std::cout << "\nQuery: " << std::endl;

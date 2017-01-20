@@ -5,6 +5,7 @@
 #include "mpi_utility.hpp"
 
 #include <iostream>
+#include <iomanip>
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED
 #include <boost/filesystem.hpp>
@@ -87,7 +88,7 @@ void mpi_query_cli_node_main() {
         query_timer.checkpoint("Sorting results");
         query_timer.stop();
         for (const auto &doc : results) {
-            std::cout << std::get<1>(doc) << ": " << std::get<0>(doc) << "\n";
+            std::cout << std::setw(30) << std::get<1>(doc) << ": " << std::get<0>(doc) << "\n";
         }
         std::cout << query_timer << std::endl;
     }

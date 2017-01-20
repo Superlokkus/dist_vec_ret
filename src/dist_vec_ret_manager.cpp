@@ -64,7 +64,7 @@ information_retrieval::dist_vec_ret_manager::document_meta_t::document_meta_t() 
 }
 
 information_retrieval::dist_vec_ret_manager::document_meta_t::document_meta_t(boost::filesystem::path path_to_file) :
-        common_name{path_to_file.filename().string()} {
+        common_name{path_to_file.string()} {
     this->id = boost::uuids::name_generator(get_namespace_uuid())(path_to_file.string());
 }
 
