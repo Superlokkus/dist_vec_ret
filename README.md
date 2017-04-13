@@ -27,3 +27,8 @@ This could be done by
 ```
 cmake -D"MPI_C_LIBRARIES=$HOME/mpich-install/lib64/libmpi.so;$HOME/mpich-install/lib64/libpmpi.so" -D"MPI_C_INCLUDE_PATH=$HOME/mpich-install/include" -D"MPI_CXX_LIBRARIES=$HOME/mpich-install/lib64/libmpicxx.so;$HOME/mpich-install/lib64/libmpi.so;$HOME/mpich-install/lib64/libpmpi.so"
 ```
+
+License
+--------------
+
+This project is distributed under the terms of the BSD 3 license. For further details see LICENSE
